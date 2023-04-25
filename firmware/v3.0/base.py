@@ -88,10 +88,9 @@ def receive():
     if packet is not None:
         node_from = packet[1]
         payload = "{0}".format(packet[4:])
-        rssi = rfm9x.last_rssi
-        print("<--",node_from,"("+str(rssi)+")",payload)
-        #print("<--",node_from,"["+str(rssi)+"]",payload)
-        #print
+        #rssi = rfm9x.last_rssi
+        #print("<--",node_from,"("+str(rssi)+")",payload)
+        print("<--",node_from)
         return(packet)
     else:
         return(None)
@@ -132,7 +131,8 @@ while True:
                     if len(sensor)==2:
                         sensorID=sensor[0]
                         node_id=0
-                        temp=float(sensor[1])*9./5.+32.
+                        #temp=float(sensor[1])*9./5.+32.
+                        temp=sensor[1]
                         print("RSSI:",rfm9x.last_rssi)
                         print(sensorID,temp)
                         if sensorID=='186':
