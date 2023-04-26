@@ -17,7 +17,7 @@ node_id = 1
 ow_bus = OneWireBus(board.D10)
 
 # set the time interval (seconds) for sending packets
-transmit_interval = 5 
+transmit_interval = 3
 
 # Define radio parameters.
 RADIO_FREQ_MHZ = 900.0  # Frequency of the radio in Mhz. Must match your
@@ -61,7 +61,7 @@ def receive():
     else:
         return(None)
 
-
+print("-" * 40)
 print("Waiting for packets...")
 time_now = time.monotonic()
 
@@ -71,28 +71,32 @@ time_now = time.monotonic()
     
 #if time.monotonic() - time_now > transmit_interval:
     #time_now = time.monotonic()
-try:
-    sensor_list = ow_bus.scan()
-    temps=str(node_id)+","
-    for sensor in sensor_list:
-        #print(sensor.rom)
-        sensor_id=int(sensor.rom[2])
-        #print("sensor_id:",sensor_id)
-        #d=str(sensor.rom,"ascii")
-        ds18 = DS18X20(ow_bus, sensor)
-        this_temp="{0:0.3f}".format(ds18.temperature)
-        time.sleep(1)
-        temps=temps+str(sensor_id)+","+this_temp+","
-        #print("Temperature: {0:0.3f}C".format(ds18.temperature))
-    payload=bytes(temps,"UTF-8")
-    print(payload)
-    #payload = bytes("hello from node {}".format(rfm9x.node), "UTF-8")
-    send(3,payload)
-except Exception as e:
-    print("error: ",e)
+    
+while True:
+    try:
+        sensor_list = ow_bus.scan()
+        temps=str(node_id)+","
+        for sensor in sensor_list:
+            #print(sensor.rom)
+            sensor_id=int(sensor.rom[2])
+            #print("sensor_id:",sensor_id)
+            #d=str(sensor.rom,"ascii")
+            ds18 = DS18X20(ow_bus, sensor)
+            this_temp="{0:0.3f}".format(ds18.temperature)
+            time.sleep(1)
+            temps=temps+str(sensor_id)+","+this_temp+","
+            #print("Temperature: {0:0.3f}C".format(ds18.temperature))
+        payload=bytes(temps,"UTF-8")
+        print(payload)
+        #payload = bytes("hello from node {}".format(rfm9x.node), "UTF-8")
+        send(3,payload)
+    except Exception as e:
+        print("error: ",e)
+
+    time.sleep(3)
 
 # Create a an alarm that will trigger 20 seconds from now.
-time_alarm = alarm.time.TimeAlarm(monotonic_time=time.monotonic() + transmit_interval)
+#time_alarm = alarm.time.TimeAlarm(monotonic_time=time.monotonic() + transmit_interval)
 # Exit the program, and then deep sleep until the alarm wakes us.
-alarm.exit_and_deep_sleep_until_alarms(time_alarm)
+#alarm.exit_and_deep_sleep_until_alarms(time_alarm)
 # Does not return, so we never get here.
