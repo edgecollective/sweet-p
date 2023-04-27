@@ -48,6 +48,7 @@ def send(node_to,payload):
         print("<--",node_to,"ACK")
     else:
         print("-->",node_to,payload)
+    print("")
 
 def receive():
     packet = rfm9x.receive(with_ack=True, with_header=True)
@@ -62,7 +63,7 @@ def receive():
         return(None)
 
 print("-" * 40)
-print("Waiting for packets...")
+print("Starting up...")
 time_now = time.monotonic()
 
 #while True:
@@ -74,6 +75,7 @@ time_now = time.monotonic()
     
 while True:
     try:
+        print("-" * 40)
         sensor_list = ow_bus.scan()
         temps=str(node_id)+","
         for sensor in sensor_list:
@@ -87,7 +89,7 @@ while True:
             temps=temps+str(sensor_id)+","+this_temp+","
             #print("Temperature: {0:0.3f}C".format(ds18.temperature))
         payload=bytes(temps,"UTF-8")
-        print(payload)
+        #print(payload)
         #payload = bytes("hello from node {}".format(rfm9x.node), "UTF-8")
         send(3,payload)
     except Exception as e:
