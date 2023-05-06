@@ -2,4 +2,5 @@
   (lib (name "sweet-p")(type "KiCad")(uri "${KIPRJMOD}/symbols/sweet-p.kicad_sym")(options "")(descr ""))
   (lib (name "picoco2")(type "KiCad")(uri "/home/db/gitwork/pico-co2/REV_X/hardware/picoco2.kicad_sym")(options "")(descr ""))
   (lib (name "RPi_Pico")(type "KiCad")(uri "/home/db/gitwork/pico-co2/REV_X/hardware/RPi_Pico.kicad_sym")(options "")(descr ""))
+  (lib (name "adafruit_ds3231")(type "KiCad")(uri "${KIPRJMOD}/symbols/adafruit_ds3231.kicad_sym")(options "")(descr ""))
 )

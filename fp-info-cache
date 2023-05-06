@@ -1,4 +1,4 @@
-21641797012043142
+21685561644657138
 Audio_Module
 Reverb_BTDR-1H
 Digital Reverberation Unit, http://www.belton.co.kr/inc/downfile.php?seq=17&file=pdf (footprint from http://www.uk-electronic.de/PDF/BTDR-1.pdf)
@@ -90677,6 +90677,188 @@ Zigbee_Module_MRF24J40MD
 0
 12
 12
+footprints
+1X01_ROUND
+
+
+0
+1
+1
+footprints
+1X11_ROUND
+
+
+0
+11
+11
+footprints
+1X16_ROUND
+<b>PIN HEADER</b>
+
+0
+16
+16
+footprints
+0603-NO
+
+
+0
+2
+2
+footprints
+0805-NO
+
+
+0
+2
+2
+footprints
+ADAFRUIT_3.5MM
+
+
+0
+0
+0
+footprints
+ADALOGGER_LOGO
+
+
+0
+0
+0
+footprints
+BTN_KMR2_4.6X2.8
+
+
+0
+4
+4
+footprints
+CR1220-2
+
+
+0
+2
+2
+footprints
+CRYSTAL_8X3.8
+<p>8.0x3.8x2.5mm SMT Crystal</p>{return}<p>Source: http://www.abracon.com/Resonators/abs25.pdf</p>
+
+0
+4
+4
+footprints
+DM3D-SF
+Micro SD
+Micro SD
+0
+14
+14
+footprints
+DM3D-SF_outline
+Micro SD
+Micro SD
+0
+14
+14
+footprints
+FEATHERLOGO
+
+
+0
+0
+0
+footprints
+FEATHERWING_NODIM
+
+
+0
+30
+30
+footprints
+FIDUCIAL_1MM
+
+
+0
+1
+1
+footprints
+MICROSD
+Courtesy: Adafruit Industries
+
+0
+12
+12
+footprints
+PCBFEAT-REV-040
+<b>Revision Level Field</b> - 40 mil<p>{return}Set version with global board attribute '>REV'
+
+0
+0
+0
+footprints
+PinSocket_1x04_P2.54mm_Vertical
+Through hole straight socket strip, 1x04, 2.54mm pitch, single row (from Kicad 4.0.7), script generated
+Through hole socket strip THT 1x04 2.54mm single row
+0
+4
+4
+footprints
+PinSocket_1x07_P2.54mm_Vertical
+Through hole straight socket strip, 1x07, 2.54mm pitch, single row (from Kicad 4.0.7), script generated
+Through hole socket strip THT 1x07 2.54mm single row
+0
+7
+7
+footprints
+SOIC8_150MIL
+<b>Small Outline IC - 150mil Wide</b>
+
+0
+8
+8
+footprints
+SOLDERJUMPER_CLOSEDWIRE
+
+
+0
+3
+3
+footprints
+ds3231_adafruit_breakout
+
+
+0
+8
+8
+footprints
+scd30
+Through hole straight pin header, 1x07, 2.54mm pitch, single row
+Through hole pin header THT 1x07 2.54mm single row
+0
+7
+7
+footprints
+scd30_a
+Through hole straight socket strip, 1x07, 2.54mm pitch, single row (from Kicad 4.0.7), script generated
+Through hole socket strip THT 1x07 2.54mm single row
+0
+7
+7
+footprints
+ssd1306
+Through hole straight socket strip, 1x04, 2.54mm pitch, single row (from Kicad 4.0.7), script generated
+Through hole socket strip THT 1x04 2.54mm single row
+0
+4
+4
+footprints
+ssd1306_a
+Through hole straight socket strip, 1x04, 2.54mm pitch, single row (from Kicad 4.0.7), script generated
+Through hole socket strip THT 1x04 2.54mm single row
+0
+4
+4
 footprints
 ssd1306_b
 Through hole straight socket strip, 1x04, 2.54mm pitch, single row (from Kicad 4.0.7), script generated
