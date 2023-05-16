@@ -55,7 +55,7 @@ class RockBlock:
         self._uart.write(str.encode("AT" + cmd + "\r"))
         if(cmd=="+SBDIX"):
             print("waiting extra long...")
-            time.sleep(10)
+            time.sleep(20)
         resp = []
         line = self._uart.readline()
         resp.append(line)
