@@ -10,6 +10,34 @@ import digitalio
 import adafruit_rfm9x
 from analogio import AnalogIn
 import struct
+from adafruit_max1704x import MAX17048
+from adafruit_lc709203f import LC709203F, PackSize
+
+i2c = board.I2C()
+while not i2c.try_lock():
+    pass
+i2c_address_list = i2c.scan()
+i2c.unlock()
+
+device = None
+
+if 0x0b in i2c_address_list:
+    lc709203 = LC709203F(board.I2C())
+    # Update to match the mAh of your battery for more accurate readings.
+    # Can be MAH100, MAH200, MAH400, MAH500, MAH1000, MAH2000, MAH3000.
+    # Choose the closest match. Include "PackSize." before it, as shown.
+    lc709203.pack_size = PackSize.MAH400
+
+    device = lc709203
+
+elif 0x36 in i2c_address_list:
+    max17048 = MAX17048(board.I2C())
+
+    device = max17048
+
+else:
+    raise Exception("Battery monitor not found.")
+
 
 #node-specific params
 node_id = 2
@@ -30,14 +58,14 @@ spi = board.SPI()
 rfm9x = adafruit_rfm9x.RFM9x(spi, LORA_CS, LORA_RESET, RADIO_FREQ_MHZ)
 rfm9x.node = node_id
 rfm9x.enable_crc = True
-rfm9x.ack_delay = 0.1
+rfm9x.ack_delay = .1
 
 
 def get_voltage(pin):
     return (pin.value * 3.3) / 65536
 
 def get_depth():
-    depth=""
+    dm=""
     data = uart.read(32)
     if data is not None:
         led.value = True
@@ -47,10 +75,10 @@ def get_depth():
         for i in d:
             if(len(i)==5):
                 #print(i)
-                depth=i.split('R')[1]
+                dm=i.split('R')[1]
         led.value = False
-    if len(depth)>1:
-        return(int(depth))
+    if len(dm)>1:
+        return(int(dm))
     else:
         return(None)
 
@@ -64,11 +92,13 @@ def send(node_to,payload):
     print("")
 
 while True:
-    x=get_depth()
-    if x is not None:
-        print("depth=",x)
+    depth=str(get_depth())
+    batt_volts=str(f"{device.cell_voltage:.2f}")
+    if depth is not None:
+        print("depth=",depth)
         #data = struct.pack("i",x)
-        payload=bytes(str(x),"UTF-8")
+        send_string=str(depth)+","+str(batt_volts)
+        payload=bytes(send_string,"UTF-8")
         #payload=data
         #send(relay_node,payload)
         send(base_node,payload)

@@ -44,7 +44,7 @@ rfm9x.node = node_id
 # enable CRC checking
 rfm9x.enable_crc = True
 # set delay before sending ACK
-rfm9x.ack_delay = 0.1
+rfm9x.ack_delay = 0.5
 # set node addresses
 
 #i2c = board.I2C()  # uses board.SCL and board.SDA
@@ -98,34 +98,49 @@ print("Waiting for packets...")
 index=0
 time_now = time.monotonic()
 while True:
+    #print("hello")
     packet=receive()
     if packet is not None:
         depth=30
-        if(wifi.radio.ipv4_address==None):
-                try:
-                    print("Connecting to %s ..."%secrets["ssid"])
-                    wifi.radio.connect(secrets["ssid"], secrets["password"])
-                    print("Connected to %s!"%secrets["ssid"])
-                    pool = socketpool.SocketPool(wifi.radio)
-                    requests = adafruit_requests.Session(pool, ssl.create_default_context())
-                except:
-                    print("can't connect to wifi")
-                
-        if (wifi.radio.ipv4_address):
-            node_id=0
-            json_data = {"private_key":private_key, "node_id":node_id,"distance_meters":depth}
-            response = None
-            while not response:
-                try:
-                    response = requests.post(JSON_POST_URL, json=json_data)
-                    failure_count = 0
-                    print(response.text)
-                except AssertionError as error:
-                    print("Request failed, retrying...\n", error)
-                    failure_count += 1
-                    if failure_count >= attempts:
-                        raise AssertionError(
-                            "Failed to resolve hostname, \
-                                            please check your router's DNS configuration."
-                        ) from error
-                    continue
+        try:
+            payload = "{0}".format(packet[4:])
+            #print(payload)
+            c=eval(str(payload,"ascii"))
+            #print(c)
+            d=str(c,"ascii")
+            #decs=d.strip()
+            decs=d.split(",")
+            print(decs)
+            depth=str(int(decs[0])/1000.)
+            batt_volts=str(decs[1])
+        
+            if(wifi.radio.ipv4_address==None):
+                    try:
+                        print("Connecting to %s ..."%secrets["ssid"])
+                        wifi.radio.connect(secrets["ssid"], secrets["password"])
+                        print("Connected to %s!"%secrets["ssid"])
+                        pool = socketpool.SocketPool(wifi.radio)
+                        requests = adafruit_requests.Session(pool, ssl.create_default_context())
+                    except:
+                        print("can't connect to wifi")
+                    
+            if (wifi.radio.ipv4_address):
+                node_id=0
+                json_data = {"private_key":private_key, "node_id":node_id,"distance_meters":depth,"battery_volts":batt_volts}
+                response = None
+                while not response:
+                    try:
+                        response = requests.post(JSON_POST_URL, json=json_data)
+                        failure_count = 0
+                        print(response.text)
+                    except AssertionError as error:
+                        print("Request failed, retrying...\n", error)
+                        failure_count += 1
+                        if failure_count >= attempts:
+                            raise AssertionError(
+                                "Failed to resolve hostname, \
+                                                please check your router's DNS configuration."
+                            ) from error
+                        continue
+        except:
+            print("error")
