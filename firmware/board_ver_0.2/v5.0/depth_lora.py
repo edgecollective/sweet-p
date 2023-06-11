@@ -144,49 +144,45 @@ send_count = 5
 
 index = -1
 
-while True:
 
-    # get the last index value
-    with open("/sd/log.txt", "r") as f:
-        lines = f.readlines()
-        #for line in lines:
-        #    print(line)
-        last_line = lines[-1]
-        j = last_line.split(' ')[0]
-        #print(lines[-1])
-        
-    index = int(j) + 1
+# get the last index value
+with open("/sd/log.txt", "r") as f:
+    lines = f.readlines()
+    #for line in lines:
+    #    print(line)
+    last_line = lines[-1]
+    j = last_line.split(' ')[0]
+    #print(lines[-1])
     
-    my_batt=0
-    my_depth=0
-    #depth=100
-    depth_cm=str(get_depth())
-    if depth_cm is not None:
-        my_depth=int(depth_cm)
-    batt_volts="0"
-    try:
-        batt_volts=str(f"{device.cell_voltage:.2f}")
-        my_batt=float(batt_volts)
-    except:
-        print("batt measure error")
+index = int(j) + 1
+
+my_batt=0
+my_depth=0
+#depth=100
+depth_cm=str(get_depth())
+if depth_cm is not None:
+    my_depth=int(depth_cm)
+batt_volts="0"
+try:
+    batt_volts=str(f"{device.cell_voltage:.2f}")
+    my_batt=float(batt_volts)
+except:
+    print("batt measure error")
+
+with open("/sd/log.txt", "a") as f:
+    print("%d %0.1f %d\n" % (index,my_batt,my_depth))
+    f.write("%d %0.1f %d\n" % (index,my_batt,my_depth))
+    led.value = False  # turn off LED to indicate we're done
+
+if(index%send_count==0):
+    send_string=str(depth_cm)+","+str(batt_volts)
+    payload=bytes(send_string,"UTF-8")
+    led.value=True
+    send(base_node,payload)
+    led.value=False
     
-    with open("/sd/log.txt", "a") as f:
-        print("%d %0.1f %d\n" % (index,my_batt,my_depth))
-        f.write("%d %0.1f %d\n" % (index,my_batt,my_depth))
-        led.value = False  # turn off LED to indicate we're done
-    
-    if(index%send_count==0):
-        send_string=str(depth_cm)+","+str(batt_volts)
-        payload=bytes(send_string,"UTF-8")
-        led.value=True
-        send(base_node,payload)
-        led.value=False
-        
-        
-    rfm9x.sleep()
-    time.sleep(1)
-    
-    #time_alarm = alarm.time.TimeAlarm(monotonic_time=time.monotonic() + sleep_interval_sec)
-    #alarm.exit_and_deep_sleep_until_alarms(time_alarm)
-    
+rfm9x.sleep()
+
+print("DONE")
+
     
