@@ -8,13 +8,20 @@ import busio
 import struct
 import digitalio
 import time
-from adafruit_debouncer import Debouncer
+#from adafruit_debouncer import Debouncer
 import adafruit_rfm9x
 from adafruit_rockblock import RockBlock
 import random
 #import alarm
 import sdcardio
 import storage
+import analogio
+
+vbat_voltage = analogio.AnalogIn(board.A3)
+
+def get_voltage(pin):
+    return (pin.value * 2.57) / 51000
+#    return (pin.value)
 
 spi = board.SPI()
 cs = board.D10
@@ -23,7 +30,9 @@ vfs = storage.VfsFat(sdcard)
 
 storage.mount(vfs, "/sd")
 
-send_count = 2
+send_count = 10 # how many wakeups before sending
+
+max_sat_send_attempts = 20
 
 index = -1
 
@@ -39,10 +48,10 @@ led = digitalio.DigitalInOut(board.LED)
 led.direction = digitalio.Direction.OUTPUT
 
 # set up the button
-pin = digitalio.DigitalInOut(board.A0)
-pin.direction = digitalio.Direction.INPUT
-pin.pull = digitalio.Pull.UP
-switch = Debouncer(pin)
+#pin = digitalio.DigitalInOut(board.A0)
+#pin.direction = digitalio.Direction.INPUT
+#pin.pull = digitalio.Pull.UP
+#switch = Debouncer(pin)
 
 
 # ultrasonic uart
@@ -111,9 +120,15 @@ print("index=",index)
 my_batt=0
 my_depth=0
 #depth=100
+
 depth_cm=get_depth()
 if depth_cm is not None:
     my_depth=depth_cm
+    
+
+battery_voltage = get_voltage(vbat_voltage)*2 #voltage divider
+my_batt=battery_voltage
+
 
 with open("/sd/log.txt", "a") as f:
     print("%d %0.1f %d\n" % (index,my_batt,my_depth))
@@ -130,7 +145,7 @@ uart = busio.UART(board.D12, board.D11, baudrate=19200)
 
 if(index%send_count==0): # then send satellite data
 
-    max_sat_send_attempts = 2
+    
     attempt=1
 
     max_num_sat_connect_attempts = 4
@@ -140,15 +155,19 @@ if(index%send_count==0): # then send satellite data
 
     sat_power_pin.value = True
     print("satellite powered")
-    time.sleep(1)
-        
+    time.sleep(3)
+    
     sat_connect_success=False
     
     while (connect_attempt < max_num_sat_connect_attempts) and (sat_connect_success==False):  
         try:
-            #satellite power pin       
+            #satellite power pin  
+            print("about to try to get to uart")     
             time.sleep(3)
             rb = RockBlock(uart)
+            
+            print("got to uart")
+            time.sleep(2)
             print(rb.model)
             
             sat_connect_success=True
@@ -160,33 +179,32 @@ if(index%send_count==0): # then send satellite data
             
             
     if(sat_connect_success==True):
-        #try:
+        try:
             
-        data = struct.pack("f",my_batt)
-        data += struct.pack("i",depth_cm)
-        data += struct.pack("i",attempt)
-        rb.data_out = data
+            data = struct.pack("f",my_batt)
+            data += struct.pack("i",my_depth)
+            data += struct.pack("i",attempt)
+            rb.data_out = data
 
-        print("Talking to satellite...")
-        status=rb.satellite_transfer()
-        print(attempt,status)
-
-        while status[0] > 8 and attempt<max_sat_send_attempts:
-            time.sleep(10)
+            print("Talking to satellite...")
             status=rb.satellite_transfer()
-            print(attempt, status)
-            #text_area.text=str(status)+"\nattempt "+str(attempt)
-            time.sleep(1)
-            attempt=attempt+1
-        #print("SAT SENT")
-        sat_send_status=status[0]
-        #except Exception as error:
+            print(attempt,status)
+
+            while status[0] > 8 and attempt<max_sat_send_attempts:
+                time.sleep(10)
+                status=rb.satellite_transfer()
+                print(attempt, status)
+                #text_area.text=str(status)+"\nattempt "+str(attempt)
+                time.sleep(1)
+                attempt=attempt+1
+            #print("SAT SENT")
+            sat_send_status=status[0]
+        except Exception as error:
             # handle the exception
-            #print("Sending error", error)
-        
+            print("Sending error", error)
         
 sat_power_pin.value = False
-print("satellite sleeping")         
+#print("satellite sleeping")         
 
 # send lora update
 print("SENDING")
@@ -202,7 +220,8 @@ time.sleep(2) #for reading screen
 
 
 #DONE pin
-done_pin = digitalio.DigitalInOut(board.D5)
+#done_pin = digitalio.DigitalInOut(board.D5)
+done_pin = digitalio.DigitalInOut(board.A0)
 done_pin.direction = digitalio.Direction.OUTPUT
 done_pin.value=True
 
