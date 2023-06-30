@@ -16,12 +16,17 @@ import random
 import sdcardio
 import storage
 import analogio
+import adafruit_ads1x15.ads1115 as ADS
+from adafruit_ads1x15.analog_in import AnalogIn
 
-vbat_voltage = analogio.AnalogIn(board.A0)
 
-def get_voltage(pin):
-    return (pin.value * 2.57) / 51000
-#    return (pin.value)
+i2c = busio.I2C(board.SCL, board.SDA)
+ads = ADS.ADS1115(i2c)
+chan = AnalogIn(ads, ADS.P0)
+
+#vbat_voltage = analogio.AnalogIn(board.A0)
+#def get_voltage(pin):
+#    return (pin.value * 2.57) / 51000
 
 spi = board.SPI()
 cs = board.D10
@@ -126,7 +131,8 @@ if depth_cm is not None:
     my_depth=depth_cm
     
 
-battery_voltage = get_voltage(vbat_voltage)*2 #voltage divider
+#battery_voltage = get_voltage(vbat_voltage)*2 #voltage divider
+battery_voltage = chan.voltage*2 #voltage divider
 my_batt=battery_voltage
 
 

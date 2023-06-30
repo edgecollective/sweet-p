@@ -16,12 +16,17 @@ import random
 import sdcardio
 import storage
 import analogio
+import adafruit_ads1x15.ads1115 as ADS
+from adafruit_ads1x15.analog_in import AnalogIn
 
-vbat_voltage = analogio.AnalogIn(board.A0)
 
-def get_voltage(pin):
-    return (pin.value * 2.57) / 51000
-#    return (pin.value)
+i2c = busio.I2C(board.SCL, board.SDA)
+ads = ADS.ADS1115(i2c)
+chan = AnalogIn(ads, ADS.P0)
+
+#vbat_voltage = analogio.AnalogIn(board.A0)
+#def get_voltage(pin):
+#    return (pin.value * 2.57) / 51000
 
 spi = board.SPI()
 cs = board.D10
@@ -30,9 +35,9 @@ vfs = storage.VfsFat(sdcard)
 
 storage.mount(vfs, "/sd")
 
-send_count = 10 # how many wakeups before sending
+send_count = 2 # how many wakeups before sending
 
-max_sat_send_attempts = 20
+max_sat_send_attempts = 10
 
 index = -1
 
@@ -113,27 +118,26 @@ with open("/sd/log.txt", "r") as f:
     j = last_line.split(' ')[0]
     #print(lines[-1])
 
-index = int(j) + 1
-print("index=",index)
+index = int(j)
+print("got index:",index)
 #time.sleep(1)
 
 my_batt=0
 my_depth=0
 #depth=100
 
-depth_cm=get_depth()
-if depth_cm is not None:
-    my_depth=depth_cm
-    
+try:
+    depth_cm=get_depth()
+    if depth_cm is not None:
+        my_depth=depth_cm
+except Exception as error:
+    # handle the exception
+    print("Connecting error:", error)
 
-battery_voltage = get_voltage(vbat_voltage)*2 #voltage divider
+#battery_voltage = get_voltage(vbat_voltage)*2 #voltage divider
+battery_voltage = chan.voltage*2 #voltage divider
 my_batt=battery_voltage
 
-
-with open("/sd/log.txt", "a") as f:
-    print("%d %0.1f %d\n" % (index,my_batt,my_depth))
-    f.write("%d %0.1f %d\n" % (index,my_batt,my_depth))
-    led.value = False  # turn off LED to indicate we're done
 
 sat_send_status=32
 
@@ -143,7 +147,7 @@ sat_power_pin = digitalio.DigitalInOut(board.A1)
 sat_power_pin.direction = digitalio.Direction.OUTPUT
 uart = busio.UART(board.D12, board.D11, baudrate=19200)
 
-if(index%send_count==0): # then send satellite data
+if(index%send_count==0): # then attempt to send satellite data
 
     
     attempt=1
@@ -190,7 +194,7 @@ if(index%send_count==0): # then send satellite data
             status=rb.satellite_transfer()
             print(attempt,status)
 
-            while status[0] > 8 and attempt<max_sat_send_attempts:
+            while status[0] > 2 and attempt<max_sat_send_attempts:
                 time.sleep(10)
                 status=rb.satellite_transfer()
                 print(attempt, status)
@@ -199,13 +203,28 @@ if(index%send_count==0): # then send satellite data
                 attempt=attempt+1
             #print("SAT SENT")
             sat_send_status=status[0]
+            
+            if(sat_send_status<=2): # successful satellite connection; increment index
+                index = index + 1
         except Exception as error:
             # handle the exception
             print("Sending error", error)
+            
+else:
+    #increment index as per usual for non-satellite send index
+    index = index + 1
+
         
 sat_power_pin.value = False
 #print("satellite sleeping")         
 
+
+with open("/sd/log.txt", "a") as f:
+    print("%d %0.1f %d\n" % (index,my_batt,my_depth))
+    f.write("%d %0.1f %d\n" % (index,my_batt,my_depth))
+    led.value = False  # turn off LED to indicate we're done
+    
+    
 # send lora update
 print("SENDING")
 send_string=str(my_depth)+","+str(my_batt)+","+str(index)+","+str(sat_send_status)+","+str(attempt)
