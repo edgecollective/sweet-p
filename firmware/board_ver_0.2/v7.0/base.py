@@ -122,8 +122,10 @@ while True:
             index = str(decs[2])
             sat_send_status = str(decs[3])
             attempt = str(decs[4])
+            error_log = str(decs[5])
             #json_data = {"private_key":private_key, "node_id":node_id,"distance_meters":depth,"battery_volts":batt_volts,"rssi":rfm9x.last_rssi}
-            json_data = {"private_key":private_key, "node_id":node_id,"distance_meters":depth,"battery_volts":batt_volts,"rssi":rfm9x.last_rssi, "aux_1":index,"aux_2":sat_send_status,"aux_3":attempt}
+            #json_data = {"private_key":private_key, "node_id":node_id,"distance_meters":depth,"battery_volts":batt_volts,"rssi":rfm9x.last_rssi, "aux_1":index,"aux_2":sat_send_status,"aux_3":attempt}
+            json_data = {"private_key":private_key, "node_id":node_id,"distance_meters":depth,"battery_volts":batt_volts,"rssi":rfm9x.last_rssi, "aux_1":index,"aux_2":sat_send_status,"aux_3":attempt,"log":error_log}
         if from_node == 3:
             node_id=3
             temp_c=decs[0]
