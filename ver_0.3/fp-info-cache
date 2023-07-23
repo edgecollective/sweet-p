@@ -1,4 +1,4 @@
-21685561644657138
+21689111575717290
 Audio_Module
 Reverb_BTDR-1H
 Digital Reverberation Unit, http://www.belton.co.kr/inc/downfile.php?seq=17&file=pdf (footprint from http://www.uk-electronic.de/PDF/BTDR-1.pdf)
@@ -90824,6 +90824,20 @@ SOLDERJUMPER_CLOSEDWIRE
 0
 3
 3
+footprints
+adafruit_ads1115
+Through hole straight socket strip, 1x06, 2.54mm pitch, single row (from Kicad 4.0.7), script generated
+Through hole socket strip THT 1x06 2.54mm single row
+0
+12
+12
+footprints
+adafruit_tpl511x
+Through hole straight socket strip, 1x05, 2.54mm pitch, single row (from Kicad 4.0.7), script generated
+Through hole socket strip THT 1x05 2.54mm single row
+0
+5
+5
 footprints
 ds3231_adafruit_breakout
 
