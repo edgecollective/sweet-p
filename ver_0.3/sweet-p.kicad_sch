@@ -4476,23 +4476,6 @@
     (pin "2" (uuid e460c17f-7b45-4e25-8913-8d68f35bd1e8))
   )
 
-  (symbol (lib_id "Mechanical:MountingHole") (at 228.6 -5.715 0) (unit 1)
-    (in_bom yes) (on_board yes) (fields_autoplaced)
-    (uuid c1b87c36-4435-4ea9-8dcd-3792ff53f4a3)
-    (property "Reference" "H2" (id 0) (at 231.14 -6.9851 0)
-      (effects (font (size 1.27 1.27)) (justify left))
-    )
-    (property "Value" "MountingHole" (id 1) (at 231.14 -4.4451 0)
-      (effects (font (size 1.27 1.27)) (justify left))
-    )
-    (property "Footprint" "MountingHole:MountingHole_3.2mm_M3" (id 2) (at 228.6 -5.715 0)
-      (effects (font (size 1.27 1.27)) hide)
-    )
-    (property "Datasheet" "~" (id 3) (at 228.6 -5.715 0)
-      (effects (font (size 1.27 1.27)) hide)
-    )
-  )
-
   (symbol (lib_id "power:GND") (at -135.89 -39.37 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid c45b2492-335a-4b12-836d-8ca95d1d4d6b)
@@ -5134,9 +5117,6 @@
     )
     (path "/352bd7ab-a539-4319-91a8-914f74ab911a"
       (reference "H1") (unit 1) (value "MountingHole") (footprint "MountingHole:MountingHole_3.2mm_M3")
-    )
-    (path "/c1b87c36-4435-4ea9-8dcd-3792ff53f4a3"
-      (reference "H2") (unit 1) (value "MountingHole") (footprint "MountingHole:MountingHole_3.2mm_M3")
     )
     (path "/318e249e-412d-4076-86d9-3d57986e4360"
       (reference "H3") (unit 1) (value "MountingHole") (footprint "MountingHole:MountingHole_3.2mm_M3")
