@@ -14,7 +14,8 @@ from adafruit_bitmap_font import bitmap_font
 from adafruit_display_text import label
 from adafruit_rockblock import RockBlock
 
-max_sat_send_attempts = 10
+max_sat_send_attempts = 20
+
 node_id = 2
 base_node = 1
 measure_interval_sec=2
@@ -114,34 +115,34 @@ def get_timestamp():
         t.tm_hour,
         t.tm_min
     )
-    return(ts)
+    return(ts,int(t.tm_hour))
 
 
 should_send = False
 send_result = 0
 
-sd_ts=get_timestamp()
+sd_ts,the_hour=get_timestamp()
 
 print("sd_ts=",sd_ts)
+print("the_hour=",the_hour)
 
 if (last_status==0):
     should_send = True
     print("last send failed, so we should send this time!")
     
 else:
-    #if(nm_hour == 5 or nm_hour == 1):          
-    #write every minute; otherwise can put above condition on write
-     
-    print("last_date=",last_date)
-    print("sd_ts=",sd_ts)
-    
-    if(last_date!=sd_ts):
-        should_send = True
-        print("new timestamp, so we should send this time!")
-    else:
-        print("same timestamp, shouldn't send")
+    print("the_hour=",the_hour)
+    if(the_hour == 1 or the_hour == 5 or the_hour == 10 or the_hour == 13 or the_hour == 18 or the_hour == 22):
+        print("last_date=",last_date)
+        print("sd_ts=",sd_ts)
+        
+        if(last_date!=sd_ts):
+            should_send = True
+            print("new timestamp, so we should send this time!")
+        else:
+            print("same timestamp, shouldn't send")
 
-if (should_send):
+if (should_send==True):
 
     my_depth=-1
     try:   
@@ -207,7 +208,7 @@ if (should_send):
             text_area.text="Connecting to satellite...\nSend attempt # "+str(attempt)+" of "+str(max_sat_send_attempts)+"\nStatus:"+str(status)
             display.refresh()
             
-            while status[0] > 2 and attempt<max_sat_send_attempts:
+            while status[0] > 4 and attempt<max_sat_send_attempts:
                 attempt=attempt+1
                 #time.sleep(10)
                 #print(attempt, status)
@@ -235,7 +236,7 @@ if (should_send):
             #send_result = 0
             display.refresh()
             error_log = error_log+MAX_TRIES_ERROR
-        
+       
 
 print("recording date & success")
     

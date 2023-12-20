@@ -19,9 +19,9 @@ days = ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sun
 
 
 # pylint: disable-msg=using-constant-test
-if False:  # change to True if you want to set the time!
+if True:  # change to True if you want to set the time!
     #                     year, mon, date, hour, min, sec, wday, yday, isdst
-    t = time.struct_time((2023, 12, 19, 14, 08, 00, 1, -1, -1))
+    t = time.struct_time((2023, 12, 19, 22, 06, 00, 1, -1, -1))
     # you must set year, mon, date, hour, min, sec and weekday
     # yearday is not supported, isdst can be set but we don't do anything with it at this time
     print("Setting time to:", t)  # uncomment for debugging
