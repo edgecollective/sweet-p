@@ -15,7 +15,7 @@ from adafruit_display_text import label
 from adafruit_rockblock import RockBlock
 import adafruit_rfm9x
 
-max_sat_send_attempts = 20
+max_sat_send_attempts = 4
 
 node_id = 2
 base_node = 1
@@ -179,7 +179,7 @@ else:
     #if(the_minute>30):
     #if(the_hour%2==0):
     my_hour=int(the_hour)
-    if(my_hour==22 or my_hour==0 or my_hour==2 or my_hour==4 or my_hour==6):
+    if(my_hour==22 or my_hour==0 or my_hour==2 or my_hour==4 or my_hour==6 or my_hour==12):
 
         print("it's a proper time to send ...")
         
@@ -212,6 +212,20 @@ rfm9x.sleep()
 
 if (should_send==True):
 
+
+    print("recording a failure, until we succeed ...")
+    # in case something freezes or we run out of time, first record a failure (send_result=0)
+    record = sd_ts + "," + str(send_result)+"\n"
+    try:
+        with open("/sd/log.txt", "a") as f:
+            #print("%d %0.1f %d\n" % (index,my_batt,my_depth))
+            f.write(record)
+            f.close()
+    except Exception as error:
+        # handle the exception
+        error_log=error_log+SDCARD_ERROR
+        print("sd card error", error)
+        
     sat_send_status=32
 
     attempt=0
