@@ -133,16 +133,16 @@ def get_depth():
 
 def get_timestamp():
     t = rtc.datetime
-    ts = "{}/{}/{} {:02}".format(  # if we want to send every minute
-    #ts = "{}/{}/{} {:02}".format(  # if we want to send every hour
+    #ts = "{}/{}/{} {:02}:{:02}".format(  # if we want to send every minute
+    ts = "{}/{}/{} {:02}".format(  # if we want to send every hour
         t.tm_mon,
         t.tm_mday,
         t.tm_year,
         t.tm_hour,
         t.tm_min
     )
-    return(ts,int(t.tm_hour),int(t.tm_min))
-    #return(ts,int(t.tm_hour))
+    #return(ts,int(t.tm_min))
+    return(ts,int(t.tm_hour))
 
 
 temperature=float(rtc.temperature)
@@ -161,26 +161,23 @@ except Exception as error:
 should_send = False
 send_result = 0
 
-sd_ts,the_hour,the_minute=get_timestamp()
-#sd_ts,the_hour=get_timestamp()
-    
+sd_ts,the_hour=get_timestamp()
+#sd_ts,the_minute=get_timestamp()
 
 print("last_date=",last_date)
 print("sd_ts=",sd_ts)
-print("the_hour=",the_hour)
-print("the_minute=",the_minute)
-#print("the hour=",the_hour)
+#print("the_minute=",the_minute)
+print("the hour=",the_hour)
 
 if (last_status==0):
     should_send = True
     print("last send failed, so we should send this time!")
     
 else:
-    #if(the_minute>30):
-    #if(the_hour%2==0):
-    my_hour=int(the_hour)
-    if(my_hour==22 or my_hour==0 or my_hour==2 or my_hour==4 or my_hour==6):
-
+    #print("the_hour=",the_hour)
+    #print("the_minute=",the_minute)
+    if(the_hour%2==0):
+    #if(the_minute%2==0):
         print("it's a proper time to send ...")
         
         if(last_date!=sd_ts):
@@ -188,124 +185,29 @@ else:
             print("... and new timestamp, so we should send this time!")
         else:
             print("... and same timestamp, shouldn't send")
+
+if (should_send==True):
+
+    # send radio and sleep
+    send_string=str(my_depth)+","+str(temperature)
+    payload=bytes(send_string,"UTF-8")
+    #led.value=True
+    send(base_node,payload)
+    #led.value=False
+    rfm9x.sleep()
+
+    sat_send_status=4
+        
+    if(sat_send_status<=4): # successful satellite connection; increment index
+        #text_area.text="SENT!"
+        #display.refresh()
+        send_result = 1
+        print("send_result=",send_result)
     else:
-        print("it's not a proper time to send")
-
-
-# in this radio code, we always get a ping when the device wakes up
-# if the device thinks it should send, it sends a fake_depth of 1; else fake_depth = 0
-
-if (should_send==True):
-    fake_depth=1
-else:
-    fake_depth=0
-    
-# send radio ping that we woke up
-# send radio and sleep
-send_string=str(fake_depth)+","+str(temperature)
-payload=bytes(send_string,"UTF-8")
-#led.value=True
-send(base_node,payload)
-#led.value=False
-rfm9x.sleep()
-
-
-if (should_send==True):
-
-    sat_send_status=32
-
-    attempt=0
-    max_num_sat_connect_attempts = 4
-    connect_attempt = 0
-    
-    sat_power_pin = digitalio.DigitalInOut(board.A1)
-    sat_power_pin.direction = digitalio.Direction.OUTPUT
-    sat_power_pin.value = True
-    print("satellite powered")
-    #text_area.text="Connecting to satellite..."
-    #display.refresh()
-    #time.sleep(3)
-    
-    sat_connect_success=False
-    uart = busio.UART(board.D12, board.D11, baudrate=19200)
-    
-    
-    
-    while (connect_attempt < max_num_sat_connect_attempts) and (sat_connect_success==False):  
-        try:
-            #satellite power pin  
-            #print("about to try to get to uart")     
-            time.sleep(1)
-            rb = RockBlock(uart)
-            
-            #print("got to uart")
-            time.sleep(1)
-            print(rb.model)
-            
-            sat_connect_success=True
-        except Exception as error:
-            # handle the exception
-            error_log = error_log+CONNECT_ERROR
-            print("Connecting error:", error)
-        
-        connect_attempt=connect_attempt+1
-        
-        
-    if(sat_connect_success==True):
-        try:
-            
-            data = struct.pack("f",my_batt)
-            data += struct.pack("i",my_depth)
-            data += struct.pack("i",attempt)
-            #data += struct.pack("f",temperature)
-            rb.data_out = data
-  
-            print("Talking to satellite...")
-            
-            attempt=attempt+1
-            status=rb.satellite_transfer()
-            print(attempt,status)
-            
-            """
-            text_area.x = 20
-            text_area.y = 40
-            text_area.text="Connecting to satellite...\nSend attempt # "+str(attempt)+" of "+str(max_sat_send_attempts)+"\nStatus:"+str(status)
-            display.refresh()
-            """
-            
-            while status[0] > 4 and attempt<max_sat_send_attempts:
-                attempt=attempt+1
-                #time.sleep(10)
-                #print(attempt, status)
-                status=rb.satellite_transfer()
-                print(attempt, status)
-                
-                
-                """
-                text_area.text="Connecting to satellite...\nSend attempt # "+str(attempt)+" of "+str(max_sat_send_attempts)+"\nStatus:"+str(status)
-                display.refresh()
-                """
-                
-                #text_area.text=str(status)+"\nattempt "+str(attempt)
-                time.sleep(1)
-                
-            #print("SAT SENT")
-            sat_send_status=status[0]
-        except Exception as error:
-            # handle the exception
-            error_log = error_log+SEND_ERROR
-            print("Sending error", error)
-            
-        if(sat_send_status<=4): # successful satellite connection; increment index
-            #text_area.text="SENT!"
-            #display.refresh()
-            send_result = 1
-            print("send_result=",send_result)
-        else:
-           # text_area.text="Unable to send..."
-            #send_result = 0
-            #display.refresh()
-            error_log = error_log+MAX_TRIES_ERROR
+       # text_area.text="Unable to send..."
+        #send_result = 0
+        #display.refresh()
+        error_log = error_log+MAX_TRIES_ERROR
        
     print("recording date & success")
         
@@ -321,13 +223,13 @@ if (should_send==True):
         error_log=error_log+SDCARD_ERROR
         print("sd card error", error)
 
-    
+
 
 print("sleeping...")
-#time.sleep(5)
+time.sleep(5)
         
 # sleep
-#print("sleeping ...")
+print("sleeping ...")
 done_pin = digitalio.DigitalInOut(board.A3)
 done_pin.direction = digitalio.Direction.OUTPUT
 done_pin.value=True
