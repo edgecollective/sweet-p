@@ -15,6 +15,19 @@ from adafruit_display_text import label
 from adafruit_rockblock import RockBlock
 import adafruit_rfm9x
 
+
+button_A_pin = digitalio.DigitalInOut(board.A5)
+button_A_pin.direction = digitalio.Direction.INPUT
+
+button_pressed=False
+
+if(button_A_pin.value): #i.e. if button is pressed in our circuit, the value will be 'False'
+    button_pressed=False
+    print("button not pressed")
+else:
+    button_pressed=True
+    print("button pressed!")
+
 max_sat_send_attempts = 4
 
 node_id = 2
@@ -42,7 +55,12 @@ display.auto_refresh=False
 font = bitmap_font.load_font("/Helvetica-Bold-16.bdf")
 color_green = 0x00FF00
 color_white = 0xFFFF
-my_text="WATER LEVEL SENSOR\nVersion 0.3\n------------------------\nGrass Nomads\n& Edge Collective"
+my_text="WATER SENSOR Ver 0.3\nGrass Nomads\n& Edge Collective"
+my_text+="\n-----------------"
+if (button_pressed):
+    my_text+="\nForce Send: ON"
+else:
+    my_text+="\nForce Send: OFF"
 text_area = label.Label(font, text=my_text, color=color_green)
 text_area.x = 10
 text_area.y = 20
@@ -206,7 +224,7 @@ print("the_minute=",the_minute)
 the_hour_mst = the_hour-2
 if(the_hour_mst < 0):
     the_hour_mst=the_hour_mst+24
-    
+
 the_time_mst="{:02}:{:02}".format(the_hour_mst,the_minute)
 
 #text_area.text="Depth (cm): "+str(my_depth)+"\n\n"+str(full_ts)+" (EST)\nMST: "+str(the_hour_mst)+":"+str(the_minute)
@@ -229,7 +247,7 @@ else:
     #my_hour=int(the_hour)
     # KEY LINE FOR DETERMINING WHEN TO SEND -- change this to the_hour_mst == 5 or the_hour_mst == 13
     #if(the_hour_mst==5 or the_hour_mst==13):
-    if(the_hour_mst%3==0):
+    if(the_hour%3==0):
         
         if(last_date!=sd_ts):
             should_send = True
@@ -241,7 +259,7 @@ else:
             time.sleep(4)
         else:
             print("Right hour to send;\nbut already sent this hour")
-            text_area.text="Hour (MST): "+str(the_hour_mst)+"\n\nGood hour to send;\nbut already sent this hour\n..so don't send."
+            text_area.text="Hour (MST): "+str(the_hour_mst)+"\n\nGood hour to send;\nbut already sent this hour\n..so don't send..."
             display.refresh()
             time.sleep(4)
     else:
@@ -249,6 +267,15 @@ else:
         text_area.text="Hour (MST): "+str(the_hour_mst)+"\n\nNot good hour to send..."
         display.refresh()
         time.sleep(4)
+        
+if (button_pressed):
+    print("Force Send button pressed")
+    print("... so, sending!")
+    should_send=True
+    text_area.text="\nForce Send Button pressed\n... so, sending!"
+    display.refresh()
+    time.sleep(4)
+    
 
 # in this radio code, we always get a ping when the device wakes up
 # if the device thinks it should send, it sends a fake_depth of 1; else fake_depth = 0
@@ -403,6 +430,9 @@ if (should_send==True):
     
 
 print("sleeping...")
+text_area.text="Sleeping..."
+display.refresh()
+time.sleep(3)
 #time.sleep(5)
         
 # sleep
