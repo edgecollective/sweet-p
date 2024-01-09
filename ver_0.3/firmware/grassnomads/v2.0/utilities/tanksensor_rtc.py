@@ -48,8 +48,8 @@ def get_timestamp():
     
 while True:
 
-    #timestamp = get_timestamp()
-    #print("ts=",timestamp)
+    timestamp = get_timestamp()
+    print("ts=",timestamp)
     
     depth = get_depth()
     print("depth=",depth)
