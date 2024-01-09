@@ -15,3 +15,4 @@ if we're in the same hour as the last recorded send, don't send again; go back t
 
 if we're not in the same hour, then send, marking time and date and whether successful (1 or )
 
+implemented.
