@@ -37,6 +37,11 @@ SEND_ERROR = 1000
 RTC_ERROR = 10000
 MAX_TRIES_ERROR = 100000
 
+time.sleep(1)
+
+# set up ultrasonic uart early on
+uart = busio.UART(board.A4, board.D2, baudrate=9600)
+
 def get_voltage(pin):
     return (pin.value * 3.3) / 65536
     
@@ -67,7 +72,6 @@ def get_depth():
                 d1=depth_data[0]
                 if (d1[0]=='R'):
                     depth=int(d1[1:])
-                    return(depth)
     return(depth)
 
 def get_timestamp():
@@ -165,7 +169,7 @@ the_time_mst="{:02}:{:02}".format(the_hour_mst,the_minute)
 
 print("the_time_mst=",the_time_mst)
 
-time.sleep(1)
+time.sleep(2)
 
 ########## setup sd card and get last line
 spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
@@ -205,7 +209,7 @@ except Exception as error:
     print("sd card error", error)
     text_area.text="SD error"
    
-time.sleep(1)
+time.sleep(2)
 
 ##############################
 
@@ -214,7 +218,7 @@ time.sleep(1)
 # quick get the depth and the battery level
 
 #######  try depth sensor
-uart = busio.UART(board.A4, board.D2, baudrate=9600)
+
 
 depth=-1
 
@@ -258,8 +262,9 @@ elif (last_status==0):
     display.refresh()
     time.sleep(2)
     print("last send failed, so we should send this time!")
- 
-elif (the_hour_mst==14 or the_hour_mst==15 or the_hour_mst==16 or the_hour_mst==17):      
+
+#elif (the_hour_mst==14 or the_hour_mst==15 or the_hour_mst==16 or the_hour_mst==17):
+elif True: # i.e., with below line's logic, send every hour      
     if (last_date!=sd_ts):
         should_send=True
         print("Right hour to send;\nhaven't sent this hour")

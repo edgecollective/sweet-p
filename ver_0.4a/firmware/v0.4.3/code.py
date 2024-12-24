@@ -23,6 +23,22 @@ button_A_pin = digitalio.DigitalInOut(board.A5)
 button_A_pin.direction = digitalio.Direction.INPUT
 button_pressed=False
 
+led = digitalio.DigitalInOut(board.D13)
+led.direction = digitalio.Direction.OUTPUT
+led.value=False
+
+
+
+
+if(button_A_pin.value): #i.e. if button is pressed in our circuit, the value will be 'False'
+    button_pressed=False
+    print("button not pressed")
+else:
+    button_pressed=True
+    print("button pressed!")
+    led.value=True
+
+
 send_result = 0 
 should_send = False
 max_num_sat_connect_attempts = 4
@@ -36,6 +52,11 @@ CONNECT_ERROR = 100
 SEND_ERROR = 1000
 RTC_ERROR = 10000
 MAX_TRIES_ERROR = 100000
+
+time.sleep(1)
+
+# set up ultrasonic uart early on
+uart = busio.UART(board.A4, board.D2, baudrate=9600)
 
 def get_voltage(pin):
     return (pin.value * 3.3) / 65536
@@ -67,7 +88,6 @@ def get_depth():
                 d1=depth_data[0]
                 if (d1[0]=='R'):
                     depth=int(d1[1:])
-                    return(depth)
     return(depth)
 
 def get_timestamp():
@@ -98,25 +118,26 @@ display = adafruit_displayio_ssd1306.SSD1306(display_bus, width=128, height=64)
 splash = displayio.Group()
 display.root_group = splash
 
-#color_bitmap = displayio.Bitmap(128, 32, 1)
-#color_palette = displayio.Palette(1)
-#color_palette[0] = 0xFFFFFF  # White
-
-#bg_sprite = displayio.TileGrid(color_bitmap, pixel_shader=color_palette, x=0, y=0)
-#splash.append(bg_sprite)
-
-# Draw a smaller inner rectangle
-#inner_bitmap = displayio.Bitmap(118, 24, 1)
-#inner_palette = displayio.Palette(1)
-#inner_palette[0] = 0x000000  # Black
-#inner_sprite = displayio.TileGrid(inner_bitmap, pixel_shader=inner_palette, x=5, y=4)
-#splash.append(inner_sprite)
 
 # Draw a label
-text = "Hello World!"
+
+text="Starting up..."
+if(button_pressed):
+    text = "Starting up...\n\nButton pressed:\nForce send!"
 text_area = label.Label(terminalio.FONT, text=text, color=0xFFFF00, x=5, y=5)
 splash.append(text_area)
+time.sleep(2)
 
+
+# try battery measurement      
+        
+batt_factor=5.*1.15
+batt_volts=get_voltage(analog_in)*batt_factor
+batt_volts_str="{:.2f}".format(batt_volts)
+text_area.text="Battery:\n"+batt_volts_str + " Volts"
+print("batt(V)="+batt_volts_str)
+
+time.sleep(2)
 
 ## rtc
 
@@ -132,7 +153,7 @@ if False:  # change to True if you want to set the time!
     
 t = rtc.datetime
 print("initial_rtc=",t.tm_hour,t.tm_min,t.tm_sec)
-text_area.text="{}:{:02}:{:02}".format(t.tm_hour, t.tm_min, t.tm_sec)
+text_area.text="Time (EST):\n{}:{:02}:{:02}".format(t.tm_hour, t.tm_min, t.tm_sec)
 
 sd_ts=""
 the_hour=-1
@@ -165,7 +186,7 @@ the_time_mst="{:02}:{:02}".format(the_hour_mst,the_minute)
 
 print("the_time_mst=",the_time_mst)
 
-time.sleep(1)
+time.sleep(2)
 
 ########## setup sd card and get last line
 spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
@@ -199,13 +220,13 @@ try:
     #with open("/sd/test.txt", "a") as f:
         #f.write("Hello world\n")
         
-    text_area.text="SD card works."
+    text_area.text="SD card:\ngood."
     
 except Exception as error:
     print("sd card error", error)
-    text_area.text="SD error"
+    text_area.text="SD card:\nerror."
    
-time.sleep(1)
+time.sleep(2)
 
 ##############################
 
@@ -214,30 +235,28 @@ time.sleep(1)
 # quick get the depth and the battery level
 
 #######  try depth sensor
-uart = busio.UART(board.A4, board.D2, baudrate=9600)
+
 
 depth=-1
+
+text_area.text="Reading depth\nsensor..."
 
 try:
     depth=get_depth()
     print("depth=",depth)
-    text_area.text="depth = "+str(depth)+" cm"
+    if (depth==-1):
+        text_area.text="No depth sensor?\nCheck connection!\n\nSending depth=-1 cm"
+    else:
+        text_area.text="Depth = "+str(depth)+" cm"
+    
     time.sleep(1)
 except Exception as error:
     print("depth sensor error", error)
     text_area.text="depth error\n"+error
 
-time.sleep(3)
-
-# try battery measurement      
-        
-batt_factor=5.
-batt_volts=get_voltage(analog_in)*batt_factor
-batt_volts_str="{:.2f}".format(batt_volts)
-text_area.text="batt(V)="+batt_volts_str
-print("batt(V)="+batt_volts_str)
-
 time.sleep(2)
+
+
 
 ## now assess whether to send via satellite
 
@@ -247,7 +266,7 @@ if (button_pressed):
     print("Force Send button pressed")
     print("... so, sending!")
     should_send=True
-    text_area.text="\nForce Send Button pressed\n... so, sending!"
+    text_area.text="\nForce Send button\npressed: sending!"
     display.refresh()
     time.sleep(2)
     
@@ -258,8 +277,9 @@ elif (last_status==0):
     display.refresh()
     time.sleep(2)
     print("last send failed, so we should send this time!")
- 
-elif (the_hour_mst==14 or the_hour_mst==15 or the_hour_mst==16 or the_hour_mst==17):      
+
+#elif (the_hour_mst==14 or the_hour_mst==15 or the_hour_mst==16 or the_hour_mst==17):
+elif True: # i.e., with below line's logic, send every hour      
     if (last_date!=sd_ts):
         should_send=True
         print("Right hour to send;\nhaven't sent this hour")
@@ -320,15 +340,15 @@ if (should_send==True):
             sat_connect_success=True
             
         except Exception as error:
-            print("rockblock error", error)
-            text_area.text="rockblock error" 
+            print("Satellite error", error)
+            text_area.text="Satellite error" 
     
         connect_attempt=connect_attempt+1
 
     if(sat_connect_success==True):
         print("then we connect to satellite")
-        text_area.text="Sending..."
-        time.sleep(2)
+        text_area.text="Preparing satellite\ndata..."
+        time.sleep(1)
         
         #try:
         data = struct.pack("f",batt_volts)

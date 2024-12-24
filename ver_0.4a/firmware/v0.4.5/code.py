@@ -297,7 +297,8 @@ elif (last_status==0):
     print("last send failed, so we should send this time!")
 
 
-# if the last reading gotten was 999, but this one isn't, then send the new reading
+# if the last reading recorded was 999, but this one isn't, then send the new reading
+# note: a 999 only would've been recorded if a send was attempted
 elif (last_depth==999 or last_depth==-1) and (depth!=999) and (depth!=-1):
     should_send=True
     print("got sensor=999 before;\n now send good value")
@@ -308,7 +309,7 @@ elif (last_depth==999 or last_depth==-1) and (depth!=999) and (depth!=-1):
     
 # if it's the proper time to send, then send
 #elif (the_hour_mst==5 or the_hour_mst==13):
-elif (the_hour_mst%1==0): # send every 1 hours
+elif (the_hour_mst%3==0): # send every 1 hours
     if (last_date!=sd_ts): # if we haven't already sent this hour
     
         should_send=True
