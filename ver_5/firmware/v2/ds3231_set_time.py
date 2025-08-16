@@ -18,13 +18,15 @@ i2c = busio.I2C(board.P0_11, board.P1_04)  # SCL, SDA
 #i2c = board.STEMMA_I2C()  # For using the built-in STEMMA QT connector on a microcontroller
 rtc = adafruit_ds3231.DS3231(i2c)
 
+print("oscillator status:",rtc.disable_oscillator)
+
 # Lookup table for names of days (nicer printing).
 days = ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
 
 
 if False:  # change to True if you want to set the time!
     #                     year, mon, date, hour, min, sec, wday, yday, isdst
-    t = time.struct_time((2025, 8, 16, 18, 08, 0, 0, -1, -1))
+    t = time.struct_time((2025, 8, 13, 20, 30, 0, 0, -1, -1))
     # you must set year, mon, date, hour, min, sec and weekday
     # yearday is not supported, isdst can be set but we don't do anything with it at this time
     print("Setting time to:", t)  # uncomment for debugging
@@ -37,4 +39,4 @@ while True:
     # print(t)     # uncomment for debugging
     print(f"The date is {days[int(t.tm_wday)]} {t.tm_mday}/{t.tm_mon}/{t.tm_year}")
     print(f"The time is {t.tm_hour}:{t.tm_min:02}:{t.tm_sec:02}")
-    time.sleep(1)  # wait a second
+    time.sleep(3)  # wait a second
