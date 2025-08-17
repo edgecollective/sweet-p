@@ -5,11 +5,11 @@ import busio
 import digitalio
 
 # Initialize I2C connection
-i2c = busio.I2C(board.P0_11, board.P1_04)  # SCL, SDA
+i2c = busio.I2C(board.SCL, board.SDA)  # SCL, SDA
 rtc = adafruit_ds3231.DS3231(i2c)
 
 # the control pin
-latch=digitalio.DigitalInOut(board.P0_09)
+latch=digitalio.DigitalInOut(board.D9)
 latch.direction=digitalio.Direction.OUTPUT
 latch.value=False
 

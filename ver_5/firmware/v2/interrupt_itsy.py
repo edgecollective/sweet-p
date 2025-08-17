@@ -5,13 +5,8 @@ import busio
 import digitalio
 
 # Initialize I2C connection
-i2c = busio.I2C(board.P0_11, board.P1_04)  # SCL, SDA
+i2c = busio.I2C(board.SCL, board.SDA)  # SCL, SDA
 rtc = adafruit_ds3231.DS3231(i2c)
-
-# the control pin
-latch=digitalio.DigitalInOut(board.P0_09)
-latch.direction=digitalio.Direction.OUTPUT
-latch.value=False
 
 led=digitalio.DigitalInOut(board.LED)
 led.direction=digitalio.Direction.OUTPUT
@@ -28,15 +23,16 @@ while True:
             t = rtc.datetime
             print(f"Alarm 1 triggered at {t.tm_hour}:{t.tm_min:02}:{t.tm_sec:02}")
             
-            rtc.alarm1_status = False
-            print("reset alarm.")
             
-            print("waiting 3 seconds ...")
-            time.sleep(3)
-            print("Turning off the light")
-            latch.value=True
-            time.sleep(0.1)
-            latch.value=False
+            print("waiting 5 seconds before alarm reset...")
+            for i in range(0,5):
+                led.value=True
+                time.sleep(1)
+                led.value=False
+                time.sleep(1)
+            print("reset alarm")
+            rtc.alarm1_status = False
+            
         
     except OSError as e:
         print(f"I2C error: {e}")
