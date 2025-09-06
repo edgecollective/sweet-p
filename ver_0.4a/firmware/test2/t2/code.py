@@ -10,6 +10,10 @@ import adafruit_displayio_ssd1306
 from adafruit_rockblock import RockBlock
 import digitalio
 
+sat_power_pin = digitalio.DigitalInOut(board.D9)
+sat_power_pin.direction = digitalio.Direction.OUTPUT
+sat_power_pin.value = False
+
 # Compatibility with both CircuitPython 8.x.x and 9.x.x
 try:
     from i2cdisplaybus import I2CDisplayBus
@@ -17,35 +21,36 @@ except ImportError:
     from displayio import I2CDisplay as I2CDisplayBus
 
 # Configuration
-WAKEUP_TIMES = [5, 15, 45]  # minutes to wake up
-MAX_RETRY = 5
+WAKEUP_TIMES = [55,5,15]  # minutes to wake up
+MAX_RETRY = 0
 SLEEP_BETWEEN = 10
 DAYS = ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
 
 def init_hardware():
     """Initialize all hardware components with error handling"""
-    try:
-        # Initialize I2C
-        i2c = board.I2C()
-        
-        # Initialize display
-        displayio.release_displays()
-        display_bus = I2CDisplayBus(i2c, device_address=0x3C)
-        display = adafruit_displayio_ssd1306.SSD1306(display_bus, width=128, height=64)
-        
-        # Initialize EEPROM and RTC
-        eeprom = adafruit_24lc32.EEPROM_I2C(i2c, address=0x57)
-        rtc = adafruit_ds3231.DS3231(i2c)
-        
-        # Initialize RockBlock
-        uart = board.UART()
-        uart.baudrate = 19200
-        rb = RockBlock(uart)
-        
-        return i2c, display, eeprom, rtc, rb
-    except Exception as e:
-        print(f"Hardware initialization failed: {e}")
-        return None, None, None, None, None
+    #try:
+    # Initialize I2C
+    i2c = board.I2C()
+    
+    # Initialize display
+    displayio.release_displays()
+    display_bus = I2CDisplayBus(i2c, device_address=0x3C)
+    display = adafruit_displayio_ssd1306.SSD1306(display_bus, width=128, height=64)
+    
+    # Initialize EEPROM and RTC
+    eeprom = adafruit_24lc32.EEPROM_I2C(i2c, address=0x57)
+    rtc = adafruit_ds3231.DS3231(i2c)
+    
+    # Initialize RockBlock
+    sat_power_pin.value = True
+    uart = board.UART()
+    uart.baudrate = 19200
+    rb = RockBlock(uart)
+    
+    return i2c, display, eeprom, rtc, rb
+    #except Exception as e:
+    #    print(f"Hardware initialization failed: {e}")
+    #    return None, None, None, None, None
 
 def setup_display(display):
     """Setup display with labels"""
@@ -196,14 +201,17 @@ def main():
         else:
             update_display(wakeup_area, stats_area, time_area, status_area, detail_area, rtc, stats, "Not time to send", "")
             time.sleep(5)
-        
-        # Sleeping
-        done_pin = digitalio.DigitalInOut(board.D7)
-        done_pin.direction = digitalio.Direction.OUTPUT
-        done_pin.value = True
-    
+            
     except Exception as e:
         print(f"Main execution error: {e}")
+        
+    done_pin = digitalio.DigitalInOut(board.D7)
+    done_pin.direction = digitalio.Direction.OUTPUT
+    done_pin.value = True
 
 if __name__ == "__main__":
     main()
+    # Sleeping
+    #done_pin = digitalio.DigitalInOut(board.D7)
+    #done_pin.direction = digitalio.Direction.OUTPUT
+    #done_pin.value = True
