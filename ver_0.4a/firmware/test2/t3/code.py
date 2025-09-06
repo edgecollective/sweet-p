@@ -21,9 +21,9 @@ except ImportError:
     from displayio import I2CDisplay as I2CDisplayBus
 
 # Configuration
-WAKEUP_TIMES = [55,5,15]  # minutes to wake up
+WAKEUP_TIMES = [15,30,45]  # minutes to wake up
 MAX_RETRY = 3
-SLEEP_BETWEEN = 10
+SLEEP_BETWEEN = 5
 DAYS = ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
 
 def init_hardware():
