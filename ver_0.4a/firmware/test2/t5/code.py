@@ -22,7 +22,7 @@ except ImportError:
     from displayio import I2CDisplay as I2CDisplayBus
 
 # Configuration
-WAKEUP_TIMES = [12,13,14]  # hours to wake up
+WAKEUP_TIMES = [5,13,18]  # hours to wake up
 MAX_RETRY = 4
 SLEEP_BETWEEN = 5
 DAYS = ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
@@ -211,7 +211,7 @@ def main():
         stats = read_from_eeprom(eeprom)
         update_display(wakeup_area, stats_area, time_area, status_area, detail_area, rtc, stats)
         
-         # clear stats (only when needed, generally leave commented out)
+        #clear stats (only when needed, generally leave commented out)
         #stats=[3,3,3]
         #write_to_eeprom(eeprom, stats)
     
