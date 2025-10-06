@@ -1,0 +1,45 @@
+import time
+import board
+import adafruit_ds3231
+import busio
+import digitalio
+
+# Initialize I2C connection
+i2c = busio.I2C(board.SCL, board.SDA)  # SCL, SDA
+rtc = adafruit_ds3231.DS3231(i2c)
+
+led=digitalio.DigitalInOut(board.LED)
+led.direction=digitalio.Direction.OUTPUT
+led.value=False
+
+# Main loop to check for alarms
+print("oscillator status:",rtc.disable_oscillator)
+
+
+while True:
+    try:
+        # Only read time when needed to reduce I2C traffic
+        if rtc.alarm1_status:
+            t = rtc.datetime
+            print(f"Alarm 1 triggered at {t.tm_hour}:{t.tm_min:02}:{t.tm_sec:02}")
+            
+            
+            print("waiting 5 seconds before alarm reset...")
+            for i in range(0,5):
+                led.value=True
+                time.sleep(1)
+                led.value=False
+                time.sleep(1)
+            print("reset alarm")
+            rtc.alarm1_status = False
+            
+        
+    except OSError as e:
+        print(f"I2C error: {e}")
+        time.sleep(2)  # Wait longer on I2C errors
+        continue
+    
+    led.value=True
+    time.sleep(.1)
+    led.value=False
+    time.sleep(1)  # Check every second

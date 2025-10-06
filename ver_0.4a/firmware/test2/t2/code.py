@@ -149,7 +149,7 @@ def main():
     """Main program logic"""
     # Initialize hardware
     i2c, display, eeprom, rtc, rb = init_hardware()
-    if not all([i2c, display, eeprom, rtc, rb]):
+    if not all([i2c, display, eeprom, rtc]):
         print("Critical hardware initialization failed!")
         return
     
