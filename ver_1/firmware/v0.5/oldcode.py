@@ -11,6 +11,9 @@ from adafruit_rockblock import RockBlock
 import digitalio
 import sys
 from analogio import AnalogIn
+import supervisor
+
+supervisor.runtime.autoreload = False
 
 button_A_pin = digitalio.DigitalInOut(board.A5)
 button_A_pin.direction = digitalio.Direction.INPUT
@@ -191,17 +194,18 @@ def send_satellite_data(rb,data, display_areas=None):
         print(f"Satellite communication failed: {e}")
         return False
 
-def get_ave_probe_adc():
-
-
-    #update_display(wakeup_area, stats_area, time_area, status_area, detail_area, rtc, stats, "Measuring depth...", "(Warming up...)")
+def get_ave_probe_adc(display_areas=None):
+    if display_areas:
+        wakeup_area, stats_area, time_area, status_area, detail_area, rtc, stats = display_areas
+        update_display(wakeup_area, stats_area, time_area, status_area, detail_area, rtc, stats, "Measuring depth...", "Warming up...")
                               
     print("turning on probe...")
     probe_power_pin.value = True
     print("waiting for probe to warm up...")
     time.sleep(PROBE_WAKEUP_TIME)
     
-    #update_display(wakeup_area, stats_area, time_area, status_area, detail_area, rtc, stats, "Measuring depth...", "Getting average...")
+    if display_areas:
+        update_display(wakeup_area, stats_area, time_area, status_area, detail_area, rtc, stats, "Measuring depth...", "Getting average...")
     
     print("getting average adc value for probe...")
     
@@ -219,7 +223,15 @@ def get_ave_probe_adc():
     
     print("ave_probe_adc=",ave_probe_adc)
     
-    #update_display(wakeup_area, stats_area, time_area, status_area, detail_area, rtc, stats, "Measuring depth...", f"Ave_probe_adc: {ave_probe_adc}")
+    if display_areas:
+        update_display(wakeup_area, stats_area, time_area, status_area, detail_area, rtc, stats, f"Ave probe ADC: {ave_probe_adc}", "Attempting to send...")
+        
+        # Countdown display
+        for countdown in range(8, 0, -1):
+            update_display(wakeup_area, stats_area, time_area, status_area, detail_area, rtc, stats, f"Ave probe ADC: {ave_probe_adc}", f"Sending in {countdown} sec")
+            time.sleep(1)
+    else:
+        time.sleep(8)
     
     print("turning off probe")
     probe_power_pin.value = False
@@ -294,6 +306,14 @@ def main():
         
         print("temperature=",temp)
         
+        batt_volts=get_voltage(battery_pin_adc)*BATT_FACTOR
+        batt_volts_str="{:.2f}".format(batt_volts)
+        #text_area.text="Battery:\n"+batt_volts_str + " Volts"
+        print("batt(V)="+batt_volts_str)
+        
+        temperature=rtc.temperature
+            
+            
         stats = read_from_eeprom(eeprom)
         
         if(FORCE_SEND):
@@ -330,11 +350,18 @@ def main():
         if latest_send_time_index >= 0 or FORCE_SEND==True:
             # Initialize RockBlock only when we need to send
             
+            display_areas = (wakeup_area, stats_area, time_area, status_area, detail_area, rtc, stats)
             
             update_display(wakeup_area, stats_area, time_area, status_area, detail_area, rtc, stats, "Measuring depth...", "")
             
             
+            print("getting average probe depth...")
             
+            depth_adc=get_ave_probe_adc(display_areas)
+            
+            print("depth_adc=",depth_adc)
+            
+            # now send via modem
             
             update_display(wakeup_area, stats_area, time_area, status_area, detail_area, rtc, stats, "Initializing modem...", "")
             rb = init_rockblock()
@@ -344,29 +371,15 @@ def main():
                 update_display(wakeup_area, stats_area, time_area, status_area, detail_area, rtc, stats, "Modem init failed", "Cannot send")
                 return
             
-            display_areas = (wakeup_area, stats_area, time_area, status_area, detail_area, rtc, stats)
+            
             
             update_display(wakeup_area, stats_area, time_area, status_area, detail_area, rtc, stats, "Attempting to send...", "")
             
             #gather the data
             # fake for now
-            batt_volts=7.
+            #batt_volts=7.
             #get battery level
-            batt_volts=get_voltage(battery_pin_adc)*BATT_FACTOR
-            batt_volts_str="{:.2f}".format(batt_volts)
-            #text_area.text="Battery:\n"+batt_volts_str + " Volts"
-            print("batt(V)="+batt_volts_str)
-            
-            
-            #depth_adc=depth_pin_adc.value
-            
-            print("getting average probe depth...")
-            
-            depth_adc=get_ave_probe_adc()
-            
-            print("depth_adc=",depth_adc)
-            
-            temperature=rtc.temperature
+           
             
             
             attempt=1 # fake data

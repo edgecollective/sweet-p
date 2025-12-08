@@ -11,6 +11,9 @@ from adafruit_rockblock import RockBlock
 import digitalio
 import sys
 from analogio import AnalogIn
+import supervisor
+
+supervisor.runtime.autoreload = False
 
 button_A_pin = digitalio.DigitalInOut(board.A5)
 button_A_pin.direction = digitalio.Direction.INPUT
@@ -99,19 +102,19 @@ def setup_display(display):
         splash = displayio.Group()
         display.root_group = splash
         
-        wakeup_area = label.Label(terminalio.FONT, text="", color=0xFFFF00, x=5, y=5)
-        stats_area = label.Label(terminalio.FONT, text="", color=0xFFFF00, x=5, y=15)
-        time_area = label.Label(terminalio.FONT, text="", color=0xFFFF00, x=5, y=25)
-        status_area = label.Label(terminalio.FONT, text="", color=0xFFFF00, x=5, y=35)
-        detail_area = label.Label(terminalio.FONT, text="", color=0xFFFF00, x=5, y=45)
+        stats_area = label.Label(terminalio.FONT, text="", color=0xFFFF00, x=5, y=5)
+        time_area = label.Label(terminalio.FONT, text="", color=0xFFFF00, x=5, y=15)
+        temp_batt_area = label.Label(terminalio.FONT, text="", color=0xFFFF00, x=5, y=25)
+        probe_area = label.Label(terminalio.FONT, text="", color=0xFFFF00, x=5, y=35)
+        satellite_area = label.Label(terminalio.FONT, text="", color=0xFFFF00, x=5, y=45)
         
-        splash.append(wakeup_area)
         splash.append(stats_area)
         splash.append(time_area)
-        splash.append(status_area)
-        splash.append(detail_area)
+        splash.append(temp_batt_area)
+        splash.append(probe_area)
+        splash.append(satellite_area)
         
-        return wakeup_area, stats_area, time_area, status_area, detail_area
+        return stats_area, time_area, temp_batt_area, probe_area, satellite_area
     except Exception as e:
         print(f"Display setup failed: {e}")
         return None, None, None, None, None
@@ -149,15 +152,23 @@ def read_from_eeprom(eeprom):
         print(f"EEPROM read failed: {e}")
         return [0, 0, 0]  # Return default values
 
-def update_display(wakeup_area, stats_area, time_area, status_area, detail_area, rtc, stats, status_msg="", detail_msg=""):
+def update_display(stats_area, time_area, temp_batt_area, probe_area, satellite_area, rtc, stats, temp=None, batt_volts=None, probe_msg="", satellite_msg=""):
     """Update display with current information"""
     try:
         t = rtc.datetime
-        wakeup_area.text = "wakeup: " + ' '.join(str(item) for item in WAKEUP_TIMES)
-        stats_area.text = "stats: " + ' '.join(str(item) for item in stats)
+        stats_area.text = "s: "+str(WAKEUP_TIMES[0])+":"+str(stats[0])+" "+ str(WAKEUP_TIMES[1])+":"+str(stats[1])+" "+ str(WAKEUP_TIMES[2])+":"+str(stats[2])
         time_area.text = f"hr:{t.tm_hour:02} min:{t.tm_min:02} sec:{t.tm_sec:02}"
-        status_area.text = status_msg
-        detail_area.text = detail_msg
+        
+        # Temperature and battery line
+        temp_batt_text = ""
+        if temp is not None:
+            temp_batt_text += f"T:{temp:.1f}C "
+        if batt_volts is not None:
+            temp_batt_text += f"B:{batt_volts:.2f}V"
+        temp_batt_area.text = temp_batt_text
+        
+        probe_area.text = probe_msg
+        satellite_area.text = satellite_msg
     except Exception as e:
         print(f"Display update failed: {e}")
 
@@ -169,9 +180,11 @@ def send_satellite_data(rb,data, display_areas=None):
         status=rb.satellite_transfer()
 
         if display_areas:
-            wakeup_area, stats_area, time_area, status_area, detail_area, rtc, stats = display_areas
-            update_display(wakeup_area, stats_area, time_area, status_area, detail_area, rtc, stats, 
-                          "Attempting send...", f"Initial Status: {status[0]}")
+            stats_area, time_area, temp_batt_area, probe_area, satellite_area, rtc, stats, temp, batt_volts = display_areas
+            # Preserve existing probe_area text and show satellite status in satellite_area
+            preserved_probe = probe_area.text
+            update_display(stats_area, time_area, temp_batt_area, probe_area, satellite_area, rtc, stats, 
+                          temp, batt_volts, preserved_probe, f"Initial Status: {status[0]}")
         
         retry = 0
         while status[0] > 8 and retry < MAX_RETRY:
@@ -179,8 +192,8 @@ def send_satellite_data(rb,data, display_areas=None):
             print(f"Retry {retry}, status: {status}")
             
             if display_areas:
-                update_display(wakeup_area, stats_area, time_area, status_area, detail_area, rtc, stats, 
-                              "Attempting send...", f"Retry {retry+1}/{MAX_RETRY} Status: {status[0]}")
+                update_display(stats_area, time_area, temp_batt_area, probe_area, satellite_area, rtc, stats, 
+                              temp, batt_volts, preserved_probe, f"Retry {retry+1}/{MAX_RETRY} Status: {status[0]}")
             
             retry += 1
             time.sleep(SLEEP_BETWEEN)
@@ -191,17 +204,18 @@ def send_satellite_data(rb,data, display_areas=None):
         print(f"Satellite communication failed: {e}")
         return False
 
-def get_ave_probe_adc():
-
-
-    #update_display(wakeup_area, stats_area, time_area, status_area, detail_area, rtc, stats, "Measuring depth...", "(Warming up...)")
+def get_ave_probe_adc(display_areas=None):
+    if display_areas:
+        stats_area, time_area, temp_batt_area, probe_area, satellite_area, rtc, stats, temp, batt_volts = display_areas
+        update_display(stats_area, time_area, temp_batt_area, probe_area, satellite_area, rtc, stats, temp, batt_volts, "Measuring depth...", "Warming up...")
                               
     print("turning on probe...")
     probe_power_pin.value = True
     print("waiting for probe to warm up...")
     time.sleep(PROBE_WAKEUP_TIME)
     
-    #update_display(wakeup_area, stats_area, time_area, status_area, detail_area, rtc, stats, "Measuring depth...", "Getting average...")
+    if display_areas:
+        update_display(stats_area, time_area, temp_batt_area, probe_area, satellite_area, rtc, stats, temp, batt_volts, "Measuring depth...", "Getting average...")
     
     print("getting average adc value for probe...")
     
@@ -219,7 +233,15 @@ def get_ave_probe_adc():
     
     print("ave_probe_adc=",ave_probe_adc)
     
-    #update_display(wakeup_area, stats_area, time_area, status_area, detail_area, rtc, stats, "Measuring depth...", f"Ave_probe_adc: {ave_probe_adc}")
+    if display_areas:
+        update_display(stats_area, time_area, temp_batt_area, probe_area, satellite_area, rtc, stats, temp, batt_volts, f"Ave probe ADC: {ave_probe_adc}", "Attempting to send...")
+        
+        # Countdown display
+        for countdown in range(8, 0, -1):
+            update_display(stats_area, time_area, temp_batt_area, probe_area, satellite_area, rtc, stats, temp, batt_volts, f"Ave probe ADC: {ave_probe_adc}", f"Sending in {countdown} sec")
+            time.sleep(1)
+    else:
+        time.sleep(8)
     
     print("turning off probe")
     probe_power_pin.value = False
@@ -269,12 +291,18 @@ def main():
         return
     
     # Setup display
-    wakeup_area, stats_area, time_area, status_area, detail_area = setup_display(display)
-    if not all([wakeup_area, stats_area, time_area, status_area, detail_area]):
+    stats_area, time_area, temp_batt_area, probe_area, satellite_area = setup_display(display)
+    if not all([stats_area, time_area, temp_batt_area, probe_area, satellite_area]):
         print("Display setup failed!")
         return
     
+    # Get temperature and battery voltage early for display
+    temp = rtc.temperature
+    print("temperature=", temp)
     
+    batt_volts = get_voltage(battery_pin_adc) * BATT_FACTOR
+    batt_volts_str = "{:.2f}".format(batt_volts)
+    print("batt(V)=" + batt_volts_str)
 
     if(button_pressed):
         print("force send!")
@@ -290,16 +318,12 @@ def main():
         print(f"The date is {DAYS[int(t.tm_wday)]} {t.tm_mday}/{t.tm_mon}/{t.tm_year}")
         print(f"The time is {t.tm_hour}:{t.tm_min:02}:{t.tm_sec:02}")
         
-        temp=rtc.temperature
-        
-        print("temperature=",temp)
-        
         stats = read_from_eeprom(eeprom)
         
         if(FORCE_SEND):
-            update_display(wakeup_area, stats_area, time_area, status_area, detail_area, rtc, stats, "Force send!", "")
+            update_display(stats_area, time_area, temp_batt_area, probe_area, satellite_area, rtc, stats, temp, batt_volts, "Force send!", "")
         else:
-            update_display(wakeup_area, stats_area, time_area, status_area, detail_area, rtc, stats)
+            update_display(stats_area, time_area, temp_batt_area, probe_area, satellite_area, rtc, stats, temp, batt_volts)
         time.sleep(2)   
         
         
@@ -330,43 +354,36 @@ def main():
         if latest_send_time_index >= 0 or FORCE_SEND==True:
             # Initialize RockBlock only when we need to send
             
+            display_areas = (stats_area, time_area, temp_batt_area, probe_area, satellite_area, rtc, stats, temp, batt_volts)
             
-            update_display(wakeup_area, stats_area, time_area, status_area, detail_area, rtc, stats, "Measuring depth...", "")
+            update_display(stats_area, time_area, temp_batt_area, probe_area, satellite_area, rtc, stats, temp, batt_volts, "Measuring depth...", "")
             
             
+            print("getting average probe depth...")
             
+            depth_adc=get_ave_probe_adc(display_areas)
             
-            update_display(wakeup_area, stats_area, time_area, status_area, detail_area, rtc, stats, "Initializing modem...", "")
+            print("depth_adc=",depth_adc)
+            
+            # now send via modem
+            
+            update_display(stats_area, time_area, temp_batt_area, probe_area, satellite_area, rtc, stats, temp, batt_volts, f"Ave probe ADC: {depth_adc}", "Initializing modem...")
             rb = init_rockblock()
             
             if rb is None:
                 print("Failed to initialize RockBlock!")
-                update_display(wakeup_area, stats_area, time_area, status_area, detail_area, rtc, stats, "Modem init failed", "Cannot send")
+                update_display(stats_area, time_area, temp_batt_area, probe_area, satellite_area, rtc, stats, temp, batt_volts, f"Ave probe ADC: {depth_adc}", "Modem init failed")
                 return
             
-            display_areas = (wakeup_area, stats_area, time_area, status_area, detail_area, rtc, stats)
             
-            update_display(wakeup_area, stats_area, time_area, status_area, detail_area, rtc, stats, "Attempting to send...", "")
+            
+            update_display(stats_area, time_area, temp_batt_area, probe_area, satellite_area, rtc, stats, temp, batt_volts, f"Ave probe ADC: {depth_adc}", "Attempting to send...")
             
             #gather the data
             # fake for now
-            batt_volts=7.
+            #batt_volts=7.
             #get battery level
-            batt_volts=get_voltage(battery_pin_adc)*BATT_FACTOR
-            batt_volts_str="{:.2f}".format(batt_volts)
-            #text_area.text="Battery:\n"+batt_volts_str + " Volts"
-            print("batt(V)="+batt_volts_str)
-            
-            
-            #depth_adc=depth_pin_adc.value
-            
-            print("getting average probe depth...")
-            
-            depth_adc=get_ave_probe_adc()
-            
-            print("depth_adc=",depth_adc)
-            
-            temperature=rtc.temperature
+           
             
             
             attempt=1 # fake data
@@ -375,7 +392,7 @@ def main():
             data = struct.pack("f",batt_volts)
             data += struct.pack("i",depth_adc)
             data += struct.pack("i",attempt)
-            data += struct.pack("f",temperature)
+            data += struct.pack("f",temp)
             data += struct.pack("i",error_log)
         
             #success = send_satellite_message(rb, "hello world", display_areas)
@@ -387,15 +404,15 @@ def main():
                 for i in range(latest_send_time_index + 1):
                     stats[i] = t.tm_mday
                 write_to_eeprom(eeprom, stats)
-                update_display(wakeup_area, stats_area, time_area, status_area, detail_area, rtc, stats, "Send successful", "Completed")
+                update_display(stats_area, time_area, temp_batt_area, probe_area, satellite_area, rtc, stats, temp, batt_volts, f"Ave probe ADC: {depth_adc}", "Send successful")
             else:
                 print("MESSAGE FAILED TO SEND")
-                update_display(wakeup_area, stats_area, time_area, status_area, detail_area, rtc, stats, "Send failed", "Max retries reached")
+                update_display(stats_area, time_area, temp_batt_area, probe_area, satellite_area, rtc, stats, temp, batt_volts, f"Ave probe ADC: {depth_adc}", "Send failed")
             
             # Power down RockBlock after use
             sat_power_pin.value = False
         else:
-            update_display(wakeup_area, stats_area, time_area, status_area, detail_area, rtc, stats, "Not time to send", "")
+            update_display(stats_area, time_area, temp_batt_area, probe_area, satellite_area, rtc, stats, temp, batt_volts, "", "Not time to send")
             time.sleep(5)
             
     except Exception as e:

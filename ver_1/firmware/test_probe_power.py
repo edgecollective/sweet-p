@@ -19,10 +19,10 @@ probe_power_pin.value = False
 while True:
     probe_power_pin.value = False
     print("D10 off")
-    time.sleep(5)
+    time.sleep(20)
     probe_power_pin.value = True
     print("D10 on")
-    time.sleep(5)
+    time.sleep(20)
     
     
 
