@@ -55,7 +55,8 @@ except ImportError:
     from displayio import I2CDisplay as I2CDisplayBus
 
 # Configuration
-WAKEUP_TIMES = [5,13,18]  # hours to wake up
+#WAKEUP_TIMES = [5,13,18]  # hours to wake up
+WAKEUP_TIMES = [2,5,7]  # hours to wake up
 MAX_RETRY = 4
 SLEEP_BETWEEN = 5
 DAYS = ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
