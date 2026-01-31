@@ -29,9 +29,9 @@ else:
     print("button pressed!")
     #led.value=True
     
-BATTERY_PIN = board.A1
+BATTERY_PIN = board.A3
 battery_pin_adc = AnalogIn(BATTERY_PIN)
-BATT_FACTOR=5.*1.15*.96
+BATT_FACTOR=2.*1.91
 
 probe_power_pin = digitalio.DigitalInOut(board.D10)
 probe_power_pin.direction = digitalio.Direction.OUTPUT

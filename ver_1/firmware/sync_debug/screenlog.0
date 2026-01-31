@@ -1,0 +1,638 @@
+Off | REPL | 9.2.0\
+>>> 
+]0;🐍BLE:Off | Done | 9.2.0\soft reboot
+
+[2K[0GAuto-reload is off.
+[2K[0Gcode.py output:
+]0;🐍BLE:Off | code.py | 9.2.0\button not pressed
+temperature= 17.0
+batt(V)=0.90
+The date is Tuesday 30/1/2026
+The time is 23:18:26
+Reading from EEPROM...
+this_hour= 5
+t.tm_hour= 23
+t.tm_mday= 30
+stats[i]= 24
+set latest_send_time_index to: 0
+this_hour= 13
+t.tm_hour= 23
+t.tm_mday= 30
+stats[i]= 23
+set latest_send_time_index to: 1
+this_hour= 18
+t.tm_hour= 23
+t.tm_mday= 30
+stats[i]= 23
+set latest_send_time_index to: 2
+Latest send time index: 2
+getting average probe depth...
+turning on probe...
+waiting for probe to warm up...
+getting average adc value for probe...
+ave_probe_adc= 24
+turning off probe
+depth_adc= 24
+giving SBDIX time to respond ...
+giving SBDIX time to respond ...
+Retry 0, status: (32, 203, 2, 0, 0, 0)
+giving SBDIX time to respond ...
+Retry 1, status: (32, 203, 2, 0, 0, 0)
+giving SBDIX time to respond ...
+Retry 2, status: (32, 203, 2, 0, 0, 0)
+giving SBDIX time to respond ...
+Retry 3, status: (32, 203, 2, 0, 0, 0)
+MESSAGE FAILED TO SEND
+]0;🐍BLE:Off | Done | 9.2.0\
+Code done running.
+
+Press any key to enter the REPL. Use CTRL-D to reload.
+]0;🐍BLE:Off | REPL | 9.2.0\
+Adafruit CircuitPython 9.2.0 on 2024-10-28; Adafruit ItsyBitsy nRF52840 Express with nRF52840
+>>> 
+]0;🐍BLE:Off | Done | 9.2.0\soft reboot
+
+[2K[0GAuto-reload is off.
+[2K[0Gcode.py output:
+]0;🐍BLE:Off | code.py | 9.2.0\button not pressed
+temperature= 16.75
+batt(V)=0.89
+The date is Tuesday 30/1/2026
+The time is 23:22:10
+Reading from EEPROM...
+this_hour= 5
+t.tm_hour= 23
+t.tm_mday= 30
+stats[i]= 24
+set latest_send_time_index to: 0
+this_hour= 13
+t.tm_hour= 23
+t.tm_mday= 30
+stats[i]= 23
+set latest_send_time_index to: 1
+this_hour= 18
+t.tm_hour= 23
+t.tm_mday= 30
+stats[i]= 23
+set latest_send_time_index to: 2
+Latest send time index: 2
+getting average probe depth...
+turning on probe...
+waiting for probe to warm up...
+getting average adc value for probe...
+ave_probe_adc= 32
+turning off probe
+depth_adc= 32
+giving SBDIX time to respond ...
+giving SBDIX time to respond ...
+Retry 0, status: (32, 203, 2, 0, 0, 0)
+giving SBDIX time to respond ...
+Retry 1, status: (32, 203, 2, 0, 0, 0)
+giving SBDIX time to respond ...
+Retry 2, status: (32, 203, 2, 0, 0, 0)
+giving SBDIX time to respond ...
+Retry 3, status: (32, 203, 2, 0, 0, 0)
+MESSAGE FAILED TO SEND
+]0;🐍BLE:Off | Done | 9.2.0\
+Code done running.
+]0;🐍BLE:Off | REPL | 9.2.0\
+Adafruit CircuitPython 9.2.0 on 2024-10-28; Adafruit ItsyBitsy nRF52840 Express with nRF52840
+>>> [A
+>>> 
+]0;🐍BLE:Off | Done | 9.2.0\soft reboot
+
+[2K[0GAuto-reload is off.
+[2K[0Gcode.py output:
+]0;🐍BLE:Off | code.py | 9.2.0\button not pressed
+temperature= 16.75
+batt(V)=0.88
+The date is Tuesday 30/1/2026
+The time is 23:26:03
+Reading from EEPROM...
+this_hour= 5
+t.tm_hour= 23
+t.tm_mday= 30
+stats[i]= 24
+set latest_send_time_index to: 0
+this_hour= 13
+t.tm_hour= 23
+t.tm_mday= 30
+stats[i]= 23
+set latest_send_time_index to: 1
+this_hour= 18
+t.tm_hour= 23
+t.tm_mday= 30
+stats[i]= 23
+set latest_send_time_index to: 2
+Latest send time index: 2
+getting average probe depth...
+turning on probe...
+waiting for probe to warm up...
+getting average adc value for probe...
+ave_probe_adc= 11
+turning off probe
+depth_adc= 11
+giving SBDIX time to respond ...
+MESSAGE SENT
+Syncing time from satellite network...
+==================================================
+DEBUG: Starting time sync from satellite
+==================================================
+DEBUG: RTC BEFORE sync: 2026-01-30 23:26:55
+Attempting to get time from satellite network...
+DEBUG: Raw satellite struct_time: struct_time(tm_year=2015, tm_mon=4, tm_mday=27, tm_hour=0, tm_min=37, tm_sec=36, tm_wday=0, tm_yday=117, tm_isdst=-1)
+DEBUG: Satellite date: 2015-04-27
+DEBUG: Satellite time (should be UTC): 00:37:36
+DEBUG: TIMEZONE_OFFSET_HOURS = -5
+DEBUG: UTC timestamp from mktime(): 1430095056
+DEBUG: Local timestamp (after adding -5 hours): 1430077056
+DEBUG: Offset applied: -18000 seconds
+DEBUG: Calculated local struct_time: struct_time(tm_year=2015, tm_mon=4, tm_mday=26, tm_hour=19, tm_min=37, tm_sec=36, tm_wday=6, tm_yday=116, tm_isdst=-1)
+DEBUG: Calculated local time: 19:37:36
+DEBUG: RTC AFTER sync: 2015-04-26 19:37:36
+==================================================
+DEBUG: COMPARE THE ABOVE TO YOUR ACTUAL EST TIME!
+DEBUG: If RTC shows 4 hours behind, the satellite time
+DEBUG: is likely already offset (not pure UTC).
+==================================================
+RTC time successfully updated to local time (UTC-5)
+Time sync successful
+Writing to EEPROM: [30, 30, 30]
+]0;🐍BLE:Off | Done | 9.2.0\
+Code done running.
+
+Press any key to enter the REPL. Use CTRL-D to reload.
+]0;🐍BLE:Off | REPL | 9.2.0\
+Adafruit CircuitPython 9.2.0 on 2024-10-28; Adafruit ItsyBitsy nRF52840 Express with nRF52840
+>>> Off | code.py | 9.2.0\Traceback (most recent call last):
+  File "code.py", line 540, in <module>
+  File "code.py", line 458, in main
+  File "code.py", line 236, in get_ave_probe_adc
+KeyboardInterrupt: 
+]0;🐍BLE:Off | 236@code.py KeyboardInterrupt | 9.2.0\
+Code done running.
+[2K[0GAuto-reload is off.
+
+Press any key to enter the REPL. Use CTRL-D to reload.
+]0;🐍BLE:Off | REPL | 9.2.0\
+Adafruit CircuitPython 9.2.0 on 2024-10-28; Adafruit ItsyBitsy nRF52840 Express with nRF52840
+>>> 
+]0;🐍BLE:Off | Done | 9.2.0\soft reboot
+
+[2K[0GAuto-reload is off.
+[2K[0Gcode.py output:
+]0;🐍BLE:Off | code.py | 9.2.0\button not pressed
+temperature= 16.5
+batt(V)=0.88
+The date is Sunday 26/4/2015
+The time is 19:46:48
+Reading from EEPROM...
+this_hour= 5
+t.tm_hour= 19
+t.tm_mday= 26
+stats[i]= 30
+set latest_send_time_index to: 0
+this_hour= 13
+t.tm_hour= 19
+t.tm_mday= 26
+stats[i]= 30
+set latest_send_time_index to: 1
+this_hour= 18
+t.tm_hour= 19
+t.tm_mday= 26
+stats[i]= 30
+set latest_send_time_index to: 2
+Latest send time index: 2
+getting average probe depth...
+turning on probe...
+waiting for probe to warm up...
+Traceback (most recent call last):
+  File "code.py", line 540, in <module>
+  File "code.py", line 458, in main
+  File "code.py", line 221, in get_ave_probe_adc
+KeyboardInterrupt: 
+]0;🐍BLE:Off | 221@code.py KeyboardInterrupt | 9.2.0\
+Code done running.
+
+Press any key to enter the REPL. Use CTRL-D to reload.
+]0;🐍BLE:Off | REPL | 9.2.0\
+Adafruit CircuitPython 9.2.0 on 2024-10-28; Adafruit ItsyBitsy nRF52840 Express with nRF52840
+>>> 
+]0;🐍BLE:Off | Done | 9.2.0\soft reboot
+
+[2K[0GAuto-reload is off.
+[2K[0Gcode.py output:
+]0;🐍BLE:Off | code.py | 9.2.0\Setting time to: struct_time(tm_year=2026, tm_mon=1, tm_mday=30, tm_hour=23, tm_min=27, tm_sec=0, tm_wday=1, tm_yday=-1, tm_isdst=-1)
+
+The date is Tuesday 30/1/2026
+The time is 23:27:00
+The date is Tuesday 30/1/2026
+The time is 23:27:01
+The date is Tuesday 30/1/2026
+The time is 23:27:02
+Traceback (most recent call last):
+  File "code.py", line 42, in <module>
+KeyboardInterrupt: 
+]0;🐍BLE:Off | 42@code.py KeyboardInterrupt | 9.2.0\
+Code done running.
+
+Press any key to enter the REPL. Use CTRL-D to reload.
+]0;🐍BLE:Off | REPL | 9.2.0\
+Adafruit CircuitPython 9.2.0 on 2024-10-28; Adafruit ItsyBitsy nRF52840 Express with nRF52840
+>>> 
+]0;🐍BLE:Off | Done | 9.2.0\soft reboot
+
+[2K[0GAuto-reload is off.
+[2K[0Gcode.py output:
+]0;🐍BLE:Off | code.py | 9.2.0\OSError: [Errno 5] Input/output error
+]0;🐍BLE:Off | Done | 9.2.0\
+Code done running.
+
+Press any key to enter the REPL. Use CTRL-D to reload.
+]0;🐍BLE:Off | REPL | 9.2.0\
+Adafruit CircuitPython 9.2.0 on 2024-10-28; Adafruit ItsyBitsy nRF52840 Express with nRF52840
+>>> 
+]0;🐍BLE:Off | Done | 9.2.0\soft reboot
+
+[2K[0GAuto-reload is off.
+[2K[0Gcode.py output:
+]0;🐍BLE:Off | code.py | 9.2.0\button not pressed
+temperature= 16.5
+batt(V)=0.89
+The date is Tuesday 30/1/2026
+The time is 23:27:28
+Reading from EEPROM...
+this_hour= 5
+t.tm_hour= 23
+t.tm_mday= 30
+stats[i]= 30
+this_hour= 13
+t.tm_hour= 23
+t.tm_mday= 30
+stats[i]= 30
+this_hour= 18
+t.tm_hour= 23
+t.tm_mday= 30
+stats[i]= 30
+Latest send time index: -1
+]0;🐍BLE:Off | Done | 9.2.0\
+Code done running.
+
+Press any key to enter the REPL. Use CTRL-D to reload.
+]0;🐍BLE:Off | REPL | 9.2.0\
+Adafruit CircuitPython 9.2.0 on 2024-10-28; Adafruit ItsyBitsy nRF52840 Express with nRF52840
+>>> 
+>>> 
+]0;🐍BLE:Off | Done | 9.2.0\soft reboot
+
+[2K[0GAuto-reload is off.
+[2K[0Gcode.py output:
+]0;🐍BLE:Off | code.py | 9.2.0\button not pressed
+Writing to EEPROM: [0, 0, 0]
+temperature= 16.5
+batt(V)=0.84
+The date is Tuesday 30/1/2026
+The time is 23:29:15
+Reading from EEPROM...
+this_hour= 5
+t.tm_hour= 23
+t.tm_mday= 30
+stats[i]= 0
+set latest_send_time_index to: 0
+this_hour= 13
+t.tm_hour= 23
+t.tm_mday= 30
+stats[i]= 0
+set latest_send_time_index to: 1
+this_hour= 18
+t.tm_hour= 23
+t.tm_mday= 30
+stats[i]= 0
+set latest_send_time_index to: 2
+Latest send time index: 2
+getting average probe depth...
+turning on probe...
+waiting for probe to warm up...
+getting average adc value for probe...
+ave_probe_adc= 59
+turning off probe
+depth_adc= 59
+giving SBDIX time to respond ...
+giving SBDIX time to respond ...
+Retry 0, status: (32, 204, 2, 0, 0, 0)
+giving SBDIX time to respond ...
+Retry 1, status: (32, 204, 2, 0, 0, 0)
+giving SBDIX time to respond ...
+Retry 2, status: (32, 204, 2, 0, 0, 0)
+giving SBDIX time to respond ...
+Retry 3, status: (32, 204, 2, 0, 0, 0)
+MESSAGE FAILED TO SEND
+]0;🐍BLE:Off | Done | 9.2.0\
+Code done running.
+
+Press any key to enter the REPL. Use CTRL-D to reload.
+]0;🐍BLE:Off | REPL | 9.2.0\
+Adafruit CircuitPython 9.2.0 on 2024-10-28; Adafruit ItsyBitsy nRF52840 Express with nRF52840
+>>> 
+]0;🐍BLE:Off | Done | 9.2.0\soft reboot
+
+[2K[0GAuto-reload is off.
+[2K[0Gcode.py output:
+]0;🐍BLE:Off | code.py | 9.2.0\button not pressed
+Writing to EEPROM: [0, 0, 0]
+temperature= 16.5
+batt(V)=0.87
+The date is Tuesday 30/1/2026
+The time is 23:33:23
+Reading from EEPROM...
+this_hour= 5
+t.tm_hour= 23
+t.tm_mday= 30
+stats[i]= 0
+set latest_send_time_index to: 0
+this_hour= 13
+t.tm_hour= 23
+t.tm_mday= 30
+stats[i]= 0
+set latest_send_time_index to: 1
+this_hour= 18
+t.tm_hour= 23
+t.tm_mday= 30
+stats[i]= 0
+set latest_send_time_index to: 2
+Latest send time index: 2
+getting average probe depth...
+turning on probe...
+waiting for probe to warm up...
+getting average adc value for probe...
+ave_probe_adc= 25
+turning off probe
+depth_adc= 25
+giving SBDIX time to respond ...
+giving SBDIX time to respond ...
+Retry 0, status: (32, 204, 2, 0, 0, 0)
+giving SBDIX time to respond ...
+Retry 1, status: (0, 204, 0, 0, 0, 0)
+MESSAGE SENT
+Syncing time from satellite network...
+==================================================
+DEBUG: Starting time sync from satellite
+==================================================
+DEBUG: RTC BEFORE sync: 2026-01-30 23:35:06
+Attempting to get time from satellite network...
+DEBUG ROCKBLOCK: Raw hex from modem: '140d6135'
+DEBUG ROCKBLOCK: Ticks since Iridium epoch: 336421173
+DEBUG ROCKBLOCK: Ticks in hex: 0x140D6135
+DEBUG ROCKBLOCK: Seconds since Iridium epoch: 30277905
+DEBUG ROCKBLOCK: WARNING - seconds seem too low!
+DEBUG ROCKBLOCK: Expected ~370000000 for year 2026
+DEBUG ROCKBLOCK: Calculated UTC time: 2015-04-27 00:55:40
+DEBUG: Raw satellite struct_time: struct_time(tm_year=2015, tm_mon=4, tm_mday=27, tm_hour=0, tm_min=55, tm_sec=40, tm_wday=0, tm_yday=117, tm_isdst=-1)
+DEBUG: Satellite date: 2015-04-27
+DEBUG: Satellite time (should be UTC): 00:55:40
+DEBUG: TIMEZONE_OFFSET_HOURS = -5
+DEBUG: UTC timestamp from mktime(): 1430096140
+DEBUG: Local timestamp (after adding -5 hours): 1430078140
+DEBUG: Offset applied: -18000 seconds
+DEBUG: Calculated local struct_time: struct_time(tm_year=2015, tm_mon=4, tm_mday=26, tm_hour=19, tm_min=55, tm_sec=40, tm_wday=6, tm_yday=116, tm_isdst=-1)
+DEBUG: Calculated local time: 19:55:40
+DEBUG: RTC AFTER sync: 2015-04-26 19:55:40
+==================================================
+DEBUG: COMPARE THE ABOVE TO YOUR ACTUAL EST TIME!
+DEBUG: If RTC shows 4 hours behind, the satellite time
+DEBUG: is likely already offset (not pure UTC).
+==================================================
+RTC time successfully updated to local time (UTC-5)
+Time sync successful
+Writing to EEPROM: [30, 30, 30]
+]0;🐍BLE:Off | Done | 9.2.0\
+Code done running.
+
+Press any key to enter the REPL. Use CTRL-D to reload.
+]0;🐍BLE:Off | REPL | 9.2.0\
+Adafruit CircuitPython 9.2.0 on 2024-10-28; Adafruit ItsyBitsy nRF52840 Express with nRF52840
+>>> [A[K[K
+>>> 
+]0;🐍BLE:Off | Done | 9.2.0\soft reboot
+
+[2K[0GAuto-reload is off.
+[2K[0Gcode.py output:
+]0;🐍BLE:Off | code.py | 9.2.0\Setting time to: struct_time(tm_year=2026, tm_mon=1, tm_mday=30, tm_hour=23, tm_min=27, tm_sec=0, tm_wday=1, tm_yday=-1, tm_isdst=-1)
+
+The date is Tuesday 30/1/2026
+The time is 23:27:00
+The date is Tuesday 30/1/2026
+The time is 23:27:01
+The date is Tuesday 30/1/2026
+The time is 23:27:02
+Traceback (most recent call last):
+  File "code.py", line 42, in <module>
+KeyboardInterrupt: 
+]0;🐍BLE:Off | 42@code.py KeyboardInterrupt | 9.2.0\
+Code done running.
+
+Press any key to enter the REPL. Use CTRL-D to reload.
+]0;🐍BLE:Off | REPL | 9.2.0\
+Adafruit CircuitPython 9.2.0 on 2024-10-28; Adafruit ItsyBitsy nRF52840 Express with nRF52840
+>>> 
+]0;🐍BLE:Off | Done | 9.2.0\soft reboot
+
+[2K[0GAuto-reload is off.
+[2K[0Gcode.py output:
+]0;🐍BLE:Off | code.py | 9.2.0\button not pressed
+temperature= 16.25
+batt(V)=0.85
+The date is Tuesday 30/1/2026
+The time is 23:27:17
+Reading from EEPROM...
+this_hour= 5
+t.tm_hour= 23
+t.tm_mday= 30
+stats[i]= 30
+this_hour= 13
+t.tm_hour= 23
+t.tm_mday= 30
+stats[i]= 30
+this_hour= 18
+t.tm_hour= 23
+t.tm_mday= 30
+stats[i]= 30
+Latest send time index: -1
+]0;🐍BLE:Off | Done | 9.2.0\
+Code done running.
+
+Press any key to enter the REPL. Use CTRL-D to reload.
+]0;🐍BLE:Off | REPL | 9.2.0\
+Adafruit CircuitPython 9.2.0 on 2024-10-28; Adafruit ItsyBitsy nRF52840 Express with nRF52840
+>>> 
+]0;🐍BLE:Off | Done | 9.2.0\soft reboot
+
+[2K[0GAuto-reload is off.
+[2K[0Gcode.py output:
+]0;🐍BLE:Off | code.py | 9.2.0\button not pressed
+Writing to EEPROM: [0, 0, 0]
+temperature= 16.25
+batt(V)=0.85
+The date is Tuesday 30/1/2026
+The time is 23:27:44
+Reading from EEPROM...
+this_hour= 5
+t.tm_hour= 23
+t.tm_mday= 30
+stats[i]= 0
+set latest_send_time_index to: 0
+this_hour= 13
+t.tm_hour= 23
+t.tm_mday= 30
+stats[i]= 0
+set latest_send_time_index to: 1
+this_hour= 18
+t.tm_hour= 23
+t.tm_mday= 30
+stats[i]= 0
+set latest_send_time_index to: 2
+Latest send time index: 2
+getting average probe depth...
+turning on probe...
+waiting for probe to warm up...
+getting average adc value for probe...
+ave_probe_adc= 28
+turning off probe
+depth_adc= 28
+giving SBDIX time to respond ...
+giving SBDIX time to respond ...
+Retry 0, status: (32, 205, 2, 0, 0, 0)
+giving SBDIX time to respond ...
+Retry 1, status: (32, 205, 2, 0, 0, 0)
+giving SBDIX time to respond ...
+Retry 2, status: (32, 205, 2, 0, 0, 0)
+giving SBDIX time to respond ...
+Retry 3, status: (32, 205, 2, 0, 0, 0)
+MESSAGE FAILED TO SEND
+]0;🐍BLE:Off | Done | 9.2.0\
+Code done running.
+
+Press any key to enter the REPL. Use CTRL-D to reload.
+]0;🐍BLE:Off | REPL | 9.2.0\
+Adafruit CircuitPython 9.2.0 on 2024-10-28; Adafruit ItsyBitsy nRF52840 Express with nRF52840
+>>> 
+]0;🐍BLE:Off | Done | 9.2.0\soft reboot
+
+[2K[0GAuto-reload is off.
+[2K[0Gcode.py output:
+]0;🐍BLE:Off | code.py | 9.2.0\button not pressed
+Writing to EEPROM: [0, 0, 0]
+temperature= 16.25
+batt(V)=0.85
+The date is Tuesday 30/1/2026
+The time is 23:30:27
+Reading from EEPROM...
+this_hour= 5
+t.tm_hour= 23
+t.tm_mday= 30
+stats[i]= 0
+set latest_send_time_index to: 0
+this_hour= 13
+t.tm_hour= 23
+t.tm_mday= 30
+stats[i]= 0
+set latest_send_time_index to: 1
+this_hour= 18
+t.tm_hour= 23
+t.tm_mday= 30
+stats[i]= 0
+set latest_send_time_index to: 2
+Latest send time index: 2
+getting average probe depth...
+turning on probe...
+waiting for probe to warm up...
+getting average adc value for probe...
+ave_probe_adc= 12
+turning off probe
+depth_adc= 12
+giving SBDIX time to respond ...
+giving SBDIX time to respond ...
+Retry 0, status: (32, 205, 2, 0, 0, 0)
+giving SBDIX time to respond ...
+Retry 1, status: (32, 205, 2, 0, 0, 0)
+giving SBDIX time to respond ...
+Retry 2, status: (32, 205, 2, 0, 0, 0)
+giving SBDIX time to respond ...
+Retry 3, status: (32, 205, 2, 0, 0, 0)
+MESSAGE FAILED TO SEND
+]0;🐍BLE:Off | Done | 9.2.0\
+Code done running.
+
+Press any key to enter the REPL. Use CTRL-D to reload.
+]0;🐍BLE:Off | REPL | 9.2.0\
+Adafruit CircuitPython 9.2.0 on 2024-10-28; Adafruit ItsyBitsy nRF52840 Express with nRF52840
+>>> 
+]0;🐍BLE:Off | Done | 9.2.0\soft reboot
+
+[2K[0GAuto-reload is off.
+[2K[0Gcode.py output:
+]0;🐍BLE:Off | code.py | 9.2.0\button not pressed
+Writing to EEPROM: [0, 0, 0]
+temperature= 16.0
+batt(V)=0.86
+The date is Tuesday 30/1/2026
+The time is 23:33:08
+Reading from EEPROM...
+this_hour= 5
+t.tm_hour= 23
+t.tm_mday= 30
+stats[i]= 0
+set latest_send_time_index to: 0
+this_hour= 13
+t.tm_hour= 23
+t.tm_mday= 30
+stats[i]= 0
+set latest_send_time_index to: 1
+this_hour= 18
+t.tm_hour= 23
+t.tm_mday= 30
+stats[i]= 0
+set latest_send_time_index to: 2
+Latest send time index: 2
+getting average probe depth...
+turning on probe...
+waiting for probe to warm up...
+getting average adc value for probe...
+ave_probe_adc= 46
+turning off probe
+depth_adc= 46
+giving SBDIX time to respond ...
+MESSAGE SENT
+Syncing time from satellite network...
+==================================================
+DEBUG: Starting time sync from satellite
+==================================================
+DEBUG: RTC BEFORE sync: 2026-01-30 23:34:00
+Attempting to get time from satellite network...
+DEBUG ROCKBLOCK: Raw hex from modem: '140d9371'
+DEBUG ROCKBLOCK: Ticks since Iridium epoch: 336434033
+DEBUG ROCKBLOCK: Ticks in hex: 0x140D9371
+DEBUG ROCKBLOCK: Seconds since Iridium epoch: 30279062
+DEBUG ROCKBLOCK: Calculated UTC time: 2026-01-31 05:05:19
+DEBUG: Raw satellite struct_time: struct_time(tm_year=2026, tm_mon=1, tm_mday=31, tm_hour=5, tm_min=5, tm_sec=19, tm_wday=5, tm_yday=31, tm_isdst=-1)
+DEBUG: Satellite date: 2026-01-31
+DEBUG: Satellite time (should be UTC): 05:05:19
+DEBUG: TIMEZONE_OFFSET_HOURS = -5
+DEBUG: UTC timestamp from mktime(): 1769835919
+DEBUG: Local timestamp (after adding -5 hours): 1769817919
+DEBUG: Offset applied: -18000 seconds
+DEBUG: Calculated local struct_time: struct_time(tm_year=2026, tm_mon=1, tm_mday=31, tm_hour=0, tm_min=5, tm_sec=19, tm_wday=5, tm_yday=31, tm_isdst=-1)
+DEBUG: Calculated local time: 00:05:19
+DEBUG: RTC AFTER sync: 2026-01-31 00:05:19
+==================================================
+DEBUG: COMPARE THE ABOVE TO YOUR ACTUAL EST TIME!
+DEBUG: If RTC shows 4 hours behind, the satellite time
+DEBUG: is likely already offset (not pure UTC).
+==================================================
+RTC time successfully updated to local time (UTC-5)
+Time sync successful
+Writing to EEPROM: [30, 30, 30]
+]0;🐍BLE:Off | Done | 9.2.0\
+Code done running.
+
+Press any key to enter the REPL. Use CTRL-D to reload.

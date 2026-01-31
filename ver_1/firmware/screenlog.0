@@ -1,0 +1,47 @@
+ | REPL | 9.2.0\
+>>> 
+>>> 
+]0;🐍BLE:Off | Done | 9.2.0\soft reboot
+
+[2K[0GAuto-reload is on. Simply save files over USB to run them or enter REPL to disable.
+[2K[0Gcode.py output:
+]0;🐍BLE:Off | code.py | 9.2.0\button not pressed
+temperature= 17.0
+batt(V)=0.90
+The date is Tuesday 30/1/2026
+The time is 23:15:32
+Reading from EEPROM...
+this_hour= 5
+t.tm_hour= 23
+t.tm_mday= 30
+stats[i]= 24
+set latest_send_time_index to: 0
+this_hour= 13
+t.tm_hour= 23
+t.tm_mday= 30
+stats[i]= 23
+set latest_send_time_index to: 1
+this_hour= 18
+t.tm_hour= 23
+t.tm_mday= 30
+stats[i]= 23
+set latest_send_time_index to: 2
+Latest send time index: 2
+getting average probe depth...
+turning on probe...
+waiting for probe to warm up...
+getting average adc value for probe...
+ave_probe_adc= 52
+turning off probe
+depth_adc= 52
+giving SBDIX time to respond ...
+giving SBDIX time to respond ...
+Satellite communication failed: 'NoneType' object is not iterable
+MESSAGE FAILED TO SEND
+]0;🐍BLE:Off | Done | 9.2.0\
+Code done running.
+
+Press any key to enter the REPL. Use CTRL-D to reload.
+]0;🐍BLE:Off | REPL | 9.2.0\
+Adafruit CircuitPython 9.2.0 on 2024-10-28; Adafruit ItsyBitsy nRF52840 Express with nRF52840
+>>> 
