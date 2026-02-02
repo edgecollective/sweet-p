@@ -29,9 +29,9 @@ else:
     print("button pressed!")
     #led.value=True
 
-BATTERY_PIN = board.A1
+BATTERY_PIN = board.A3
 battery_pin_adc = AnalogIn(BATTERY_PIN)
-BATT_FACTOR=2.
+BATT_FACTOR=2.*1.91
 
 probe_power_pin = digitalio.DigitalInOut(board.D10)
 probe_power_pin.direction = digitalio.Direction.OUTPUT
@@ -56,7 +56,7 @@ except ImportError:
 
 # Configuration
 #WAKEUP_TIMES = [5,13,18]  # hours to wake up
-WAKEUP_TIMES = [10,11,12]  # hours to wake up
+WAKEUP_TIMES = [9,10,11]  # hours to wake up
 MAX_RETRY = 4
 SLEEP_BETWEEN = 5
 DAYS = ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
@@ -370,6 +370,93 @@ def send_satellite_message(rb, message, display_areas=None):
         print(f"Satellite communication failed: {e}")
         return False
 
+def probe_test():
+
+    FORCE_SEND=False
+    # Initialize hardware (excluding RockBlock)
+    i2c, display, eeprom, rtc = init_hardware()
+
+    #clear_stats(eeprom)
+
+
+    if not all([i2c, display, eeprom, rtc]):
+        print("Critical hardware initialization failed!")
+        return
+
+    # Setup display
+    stats_area, time_area, temp_batt_area, probe_area, satellite_area = setup_display(display)
+    if not all([stats_area, time_area, temp_batt_area, probe_area, satellite_area]):
+        print("Display setup failed!")
+        return
+
+    # Get temperature and battery voltage early for display
+    temp = rtc.temperature
+    print("temperature=", temp)
+
+    batt_volts = get_voltage(battery_pin_adc) * BATT_FACTOR
+    batt_volts_str = "{:.2f}".format(batt_volts)
+    print("batt(V)=" + batt_volts_str)
+
+    if(button_pressed):
+        print("force send!")
+        FORCE_SEND=True
+        #update_display(wakeup_area, stats_area, time_area, status_area, detail_area, rtc, stats, "Force send!", "")
+
+        time.sleep(2)
+
+
+    # Get current time and stats
+    try:
+        t = rtc.datetime
+        print(f"The date is {DAYS[int(t.tm_wday)]} {t.tm_mday}/{t.tm_mon}/{t.tm_year}")
+        print(f"The time is {t.tm_hour}:{t.tm_min:02}:{t.tm_sec:02}")
+
+        stats = read_from_eeprom(eeprom)
+
+        if(FORCE_SEND):
+            update_display(stats_area, time_area, temp_batt_area, probe_area, satellite_area, rtc, stats, temp, batt_volts, "Force send!", "")
+        else:
+            update_display(stats_area, time_area, temp_batt_area, probe_area, satellite_area, rtc, stats, temp, batt_volts)
+        time.sleep(2)
+
+
+        # Find the latest send time we've passed
+        latest_send_time_index = -1
+        for i in range(len(WAKEUP_TIMES)):
+            this_hour=WAKEUP_TIMES[i]
+
+            print("this_hour=",this_hour)
+            print("t.tm_hour=",t.tm_hour)
+            print("t.tm_mday=",t.tm_mday)
+            print("stats[i]=",stats[i])
+
+            if (int(this_hour)<=int(t.tm_hour)) and (stats[i]!=t.tm_mday):
+                latest_send_time_index=i
+                print("set latest_send_time_index to:",latest_send_time_index)
+
+
+
+        #for i, wake_minute in enumerate(WAKEUP_TIMES):
+        #    if wake_minute <= t.tm_min:
+        #        latest_send_time_index = i
+
+        print(f"Latest send time index: {latest_send_time_index}")
+
+        # Send message if we've reached a send time or if FORCE_SEND==True
+
+        #if latest_send_time_index >= 0 or FORCE_SEND==True:
+            # Initialize RockBlock only when we need to send
+
+        display_areas = (stats_area, time_area, temp_batt_area, probe_area, satellite_area, rtc, stats, temp, batt_volts)
+        
+        while True:
+
+            depth_adc=get_ave_probe_adc(display_areas)
+            print(depth_adc)
+
+    except Exception as e:
+        print(f"Probe test error: {e}")
+
 def main():
     """Main program logic"""
 
@@ -394,8 +481,6 @@ def main():
     temp = rtc.temperature
     print("temperature=", temp)
 
-
-    time.sleep(3) # give a little time for voltage to settle
     batt_volts = get_voltage(battery_pin_adc) * BATT_FACTOR
     batt_volts_str = "{:.2f}".format(batt_volts)
     print("batt(V)=" + batt_volts_str)
@@ -539,7 +624,8 @@ def main():
 
 if __name__ == "__main__":
 
-    main()
+    #main()
+    probe_test()
     # Sleeping
     #done_pin = digitalio.DigitalInOut(board.D7)
         #done_pin.direction = digitalio.Direction.OUTPUT

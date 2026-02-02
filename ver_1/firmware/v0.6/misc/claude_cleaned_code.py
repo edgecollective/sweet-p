@@ -13,6 +13,10 @@ import sys
 from analogio import AnalogIn
 import supervisor
 
+# Firmware version 0.6
+# - Fixed Iridium ERA3 epoch transition (Jan 14, 2026)
+# - RockBlock library now uses ERA3 epoch (Feb 14, 2025) for time calculation
+
 TIMEZONE_OFFSET_HOURS = -5  # EST offset from UTC (change to -4 for EDT)
 
 supervisor.runtime.autoreload = False
@@ -27,11 +31,10 @@ if(button_A_pin.value): #i.e. if button is pressed in our circuit, the value wil
 else:
     button_pressed=True
     print("button pressed!")
-    #led.value=True
 
-BATTERY_PIN = board.A1
+BATTERY_PIN = board.A3
 battery_pin_adc = AnalogIn(BATTERY_PIN)
-BATT_FACTOR=2.
+BATT_FACTOR=2.*1.91
 
 probe_power_pin = digitalio.DigitalInOut(board.D10)
 probe_power_pin.direction = digitalio.Direction.OUTPUT
@@ -55,8 +58,7 @@ except ImportError:
     from displayio import I2CDisplay as I2CDisplayBus
 
 # Configuration
-#WAKEUP_TIMES = [5,13,18]  # hours to wake up
-WAKEUP_TIMES = [10,11,12]  # hours to wake up
+WAKEUP_TIMES = [9,10,11]  # hours to wake up (5 AM, 1 PM, 6 PM local time)
 MAX_RETRY = 4
 SLEEP_BETWEEN = 5
 DAYS = ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
@@ -69,8 +71,6 @@ def get_voltage(pin):
 
 def init_hardware():
     """Initialize hardware components (without RockBlock modem)"""
-    #try:
-    # Initialize I2C
     i2c = board.I2C()
 
     # Initialize display
@@ -83,9 +83,6 @@ def init_hardware():
     rtc = adafruit_ds3231.DS3231(i2c)
 
     return i2c, display, eeprom, rtc
-    #except Exception as e:
-    #    print(f"Hardware initialization failed: {e}")
-    #    return None, None, None, None
 
 def init_rockblock():
     """Initialize RockBlock modem only when needed"""
@@ -130,7 +127,6 @@ def clear_stats(eeprom):
 def write_to_eeprom(eeprom, integers_to_write):
     """Write integers to EEPROM with error handling"""
     try:
-        print(f"Writing to EEPROM: {integers_to_write}")
         for i, value in enumerate(integers_to_write):
             byte_data = struct.pack('<i', value)
             start_addr = i * 4
@@ -144,7 +140,6 @@ def write_to_eeprom(eeprom, integers_to_write):
 def read_from_eeprom(eeprom):
     """Read integers from EEPROM with error handling"""
     try:
-        print("Reading from EEPROM...")
         retrieved_integers = []
         for i in range(3):
             start_addr = i * 4
@@ -178,16 +173,14 @@ def update_display(stats_area, time_area, temp_batt_area, probe_area, satellite_
     except Exception as e:
         print(f"Display update failed: {e}")
 
-def send_satellite_data(rb,data, display_areas=None):
+def send_satellite_data(rb, data, display_areas=None):
+    """Send binary data via satellite with retry logic"""
     try:
-
-
         rb.data_out = data
-        status=rb.satellite_transfer()
+        status = rb.satellite_transfer()
 
         if display_areas:
             stats_area, time_area, temp_batt_area, probe_area, satellite_area, rtc, stats, temp, batt_volts = display_areas
-            # Preserve existing probe_area text and show satellite status in satellite_area
             preserved_probe = probe_area.text
             update_display(stats_area, time_area, temp_batt_area, probe_area, satellite_area, rtc, stats,
                           temp, batt_volts, preserved_probe, f"Initial Status: {status[0]}")
@@ -211,33 +204,24 @@ def send_satellite_data(rb,data, display_areas=None):
         return False
 
 def get_ave_probe_adc(display_areas=None):
+    """Get average ADC reading from depth probe"""
     if display_areas:
         stats_area, time_area, temp_batt_area, probe_area, satellite_area, rtc, stats, temp, batt_volts = display_areas
         update_display(stats_area, time_area, temp_batt_area, probe_area, satellite_area, rtc, stats, temp, batt_volts, "Measuring depth...", "Warming up...")
 
-    print("turning on probe...")
     probe_power_pin.value = True
-    print("waiting for probe to warm up...")
     time.sleep(PROBE_WAKEUP_TIME)
 
     if display_areas:
         update_display(stats_area, time_area, temp_batt_area, probe_area, satellite_area, rtc, stats, temp, batt_volts, "Measuring depth...", "Getting average...")
 
-    print("getting average adc value for probe...")
+    ave_probe_adc = 0.
 
-    ave_probe_adc=0.
-
-    for i in range(0,NUM_AVE):
-
-        #probe_power_pin.value = False
-        #print("D10 off")
+    for i in range(0, NUM_AVE):
         ave_probe_adc = ave_probe_adc + probe_adc.value
-
         time.sleep(TIME_SPACING)
 
-    ave_probe_adc=int(ave_probe_adc/float(NUM_AVE))
-
-    print("ave_probe_adc=",ave_probe_adc)
+    ave_probe_adc = int(ave_probe_adc / float(NUM_AVE))
 
     if display_areas:
         update_display(stats_area, time_area, temp_batt_area, probe_area, satellite_area, rtc, stats, temp, batt_volts, f"Ave probe ADC: {ave_probe_adc}", "Attempting to send...")
@@ -249,37 +233,20 @@ def get_ave_probe_adc(display_areas=None):
     else:
         time.sleep(8)
 
-    print("turning off probe")
     probe_power_pin.value = False
-    return(ave_probe_adc)
+    return ave_probe_adc
 
 def sync_time_from_satellite(rb, rtc, display_areas=None):
-    """Sync RTC time from satellite network with timezone offset - DEBUG VERSION"""
+    """Sync RTC time from satellite network with timezone offset"""
     try:
         if display_areas:
             stats_area, time_area, temp_batt_area, probe_area, satellite_area, _, stats, temp, batt_volts = display_areas
             update_display(stats_area, time_area, temp_batt_area, probe_area, satellite_area, rtc, stats, temp, batt_volts, "Time sync", "Connecting to network...")
 
-        print("=" * 50)
-        print("DEBUG: Starting time sync from satellite")
-        print("=" * 50)
-
-        # First, show what the RTC currently has
-        current_rtc = rtc.datetime
-        print(f"DEBUG: RTC BEFORE sync: {current_rtc.tm_year}-{current_rtc.tm_mon:02}-{current_rtc.tm_mday:02} {current_rtc.tm_hour:02}:{current_rtc.tm_min:02}:{current_rtc.tm_sec:02}")
-
-        print("Attempting to get time from satellite network...")
-
         # Get system time from satellite network (UTC)
         sat_time_utc = rb.system_time
 
         if sat_time_utc:
-            # DEBUG: Print raw satellite time
-            print(f"DEBUG: Raw satellite struct_time: {sat_time_utc}")
-            print(f"DEBUG: Satellite date: {sat_time_utc.tm_year}-{sat_time_utc.tm_mon:02}-{sat_time_utc.tm_mday:02}")
-            print(f"DEBUG: Satellite time (should be UTC): {sat_time_utc.tm_hour:02}:{sat_time_utc.tm_min:02}:{sat_time_utc.tm_sec:02}")
-            print(f"DEBUG: TIMEZONE_OFFSET_HOURS = {TIMEZONE_OFFSET_HOURS}")
-
             if display_areas:
                 update_display(stats_area, time_area, temp_batt_area, probe_area, satellite_area, rtc, stats, temp, batt_volts, "Time sync", "Converting to local...")
 
@@ -288,15 +255,8 @@ def sync_time_from_satellite(rb, rtc, display_areas=None):
 
             # Convert struct_time to timestamp, apply offset, convert back
             utc_timestamp = time_module.mktime(sat_time_utc)
-            print(f"DEBUG: UTC timestamp from mktime(): {utc_timestamp}")
-
-            local_timestamp = utc_timestamp + (TIMEZONE_OFFSET_HOURS * 3600)  # 3600 seconds = 1 hour
-            print(f"DEBUG: Local timestamp (after adding {TIMEZONE_OFFSET_HOURS} hours): {local_timestamp}")
-            print(f"DEBUG: Offset applied: {TIMEZONE_OFFSET_HOURS * 3600} seconds")
-
+            local_timestamp = utc_timestamp + (TIMEZONE_OFFSET_HOURS * 3600)
             local_time = time_module.localtime(local_timestamp)
-            print(f"DEBUG: Calculated local struct_time: {local_time}")
-            print(f"DEBUG: Calculated local time: {local_time.tm_hour:02}:{local_time.tm_min:02}:{local_time.tm_sec:02}")
 
             if display_areas:
                 update_display(stats_area, time_area, temp_batt_area, probe_area, satellite_area, rtc, stats, temp, batt_volts, "Time sync", "Setting RTC...")
@@ -304,24 +264,13 @@ def sync_time_from_satellite(rb, rtc, display_areas=None):
             # Set the RTC with the local time
             rtc.datetime = local_time
 
-            # DEBUG: Verify what was actually stored
-            time_module.sleep(0.5)  # Small delay to ensure RTC is updated
-            verify_time = rtc.datetime
-            print(f"DEBUG: RTC AFTER sync: {verify_time.tm_year}-{verify_time.tm_mon:02}-{verify_time.tm_mday:02} {verify_time.tm_hour:02}:{verify_time.tm_min:02}:{verify_time.tm_sec:02}")
-            print("=" * 50)
-            print("DEBUG: COMPARE THE ABOVE TO YOUR ACTUAL EST TIME!")
-            print("DEBUG: If RTC shows 4 hours behind, the satellite time")
-            print("DEBUG: is likely already offset (not pure UTC).")
-            print("=" * 50)
-
             if display_areas:
                 update_display(stats_area, time_area, temp_batt_area, probe_area, satellite_area, rtc, stats, temp, batt_volts, "Time sync", "Local time set!")
 
-            print(f"RTC time successfully updated to local time (UTC{TIMEZONE_OFFSET_HOURS:+d})")
+            print(f"RTC synced to local time (UTC{TIMEZONE_OFFSET_HOURS:+d})")
             return True
         else:
             print("Failed to get time from satellite network")
-            print("DEBUG: rb.system_time returned None")
 
             if display_areas:
                 update_display(stats_area, time_area, temp_batt_area, probe_area, satellite_area, rtc, stats, temp, batt_volts, "Time sync", "Sync failed")
@@ -330,10 +279,6 @@ def sync_time_from_satellite(rb, rtc, display_areas=None):
 
     except Exception as e:
         print(f"Time sync failed: {e}")
-        import sys
-        exc_type, exc_value, exc_traceback = sys.exc_info()
-        if exc_traceback:
-            print(f"DEBUG: Exception at line {exc_traceback.tb_lineno}")
 
         if display_areas:
             stats_area, time_area, temp_batt_area, probe_area, satellite_area, _, stats, temp, batt_volts = display_areas
@@ -341,44 +286,12 @@ def sync_time_from_satellite(rb, rtc, display_areas=None):
 
         return False
 
-def send_satellite_message(rb, message, display_areas=None):
-    """Send message via satellite with retry logic"""
-    try:
-        rb.text_out = message
-        print("Talking to satellite...")
-        status = rb.satellite_transfer()
-
-        if display_areas:
-            wakeup_area, stats_area, time_area, status_area, detail_area, rtc, stats = display_areas
-            update_display(wakeup_area, stats_area, time_area, status_area, detail_area, rtc, stats,
-                          "Attempting send...", f"Initial Status: {status[0]}")
-
-        retry = 0
-        while status[0] > 8 and retry < MAX_RETRY:
-            status = rb.satellite_transfer()
-            print(f"Retry {retry}, status: {status}")
-
-            if display_areas:
-                update_display(wakeup_area, stats_area, time_area, status_area, detail_area, rtc, stats,
-                              "Attempting send...", f"Retry {retry+1}/{MAX_RETRY} Status: {status[0]}")
-
-            retry += 1
-            time.sleep(SLEEP_BETWEEN)
-
-        return status[0] <= 8
-    except Exception as e:
-        print(f"Satellite communication failed: {e}")
-        return False
-
 def main():
     """Main program logic"""
 
-    FORCE_SEND=False
+    FORCE_SEND = False
     # Initialize hardware (excluding RockBlock)
     i2c, display, eeprom, rtc = init_hardware()
-
-    #clear_stats(eeprom)
-
 
     if not all([i2c, display, eeprom, rtc]):
         print("Critical hardware initialization failed!")
@@ -392,77 +305,42 @@ def main():
 
     # Get temperature and battery voltage early for display
     temp = rtc.temperature
-    print("temperature=", temp)
-
-
-    time.sleep(3) # give a little time for voltage to settle
     batt_volts = get_voltage(battery_pin_adc) * BATT_FACTOR
-    batt_volts_str = "{:.2f}".format(batt_volts)
-    print("batt(V)=" + batt_volts_str)
 
-    if(button_pressed):
-        print("force send!")
-        FORCE_SEND=True
-        #update_display(wakeup_area, stats_area, time_area, status_area, detail_area, rtc, stats, "Force send!", "")
-
+    if button_pressed:
+        FORCE_SEND = True
         time.sleep(2)
-
 
     # Get current time and stats
     try:
         t = rtc.datetime
-        print(f"The date is {DAYS[int(t.tm_wday)]} {t.tm_mday}/{t.tm_mon}/{t.tm_year}")
-        print(f"The time is {t.tm_hour}:{t.tm_min:02}:{t.tm_sec:02}")
+        print(f"Date: {DAYS[int(t.tm_wday)]} {t.tm_mday}/{t.tm_mon}/{t.tm_year}")
+        print(f"Time: {t.tm_hour}:{t.tm_min:02}:{t.tm_sec:02}")
 
         stats = read_from_eeprom(eeprom)
 
-        if(FORCE_SEND):
+        if FORCE_SEND:
             update_display(stats_area, time_area, temp_batt_area, probe_area, satellite_area, rtc, stats, temp, batt_volts, "Force send!", "")
         else:
             update_display(stats_area, time_area, temp_batt_area, probe_area, satellite_area, rtc, stats, temp, batt_volts)
         time.sleep(2)
 
-
         # Find the latest send time we've passed
         latest_send_time_index = -1
         for i in range(len(WAKEUP_TIMES)):
-            this_hour=WAKEUP_TIMES[i]
-
-            print("this_hour=",this_hour)
-            print("t.tm_hour=",t.tm_hour)
-            print("t.tm_mday=",t.tm_mday)
-            print("stats[i]=",stats[i])
-
-            if (int(this_hour)<=int(t.tm_hour)) and (stats[i]!=t.tm_mday):
-                latest_send_time_index=i
-                print("set latest_send_time_index to:",latest_send_time_index)
-
-
-
-        #for i, wake_minute in enumerate(WAKEUP_TIMES):
-        #    if wake_minute <= t.tm_min:
-        #        latest_send_time_index = i
-
-        print(f"Latest send time index: {latest_send_time_index}")
+            this_hour = WAKEUP_TIMES[i]
+            if (int(this_hour) <= int(t.tm_hour)) and (stats[i] != t.tm_mday):
+                latest_send_time_index = i
 
         # Send message if we've reached a send time or if FORCE_SEND==True
-
-        if latest_send_time_index >= 0 or FORCE_SEND==True:
-            # Initialize RockBlock only when we need to send
-
+        if latest_send_time_index >= 0 or FORCE_SEND:
             display_areas = (stats_area, time_area, temp_batt_area, probe_area, satellite_area, rtc, stats, temp, batt_volts)
 
             update_display(stats_area, time_area, temp_batt_area, probe_area, satellite_area, rtc, stats, temp, batt_volts, "Measuring depth...", "")
 
+            depth_adc = get_ave_probe_adc(display_areas)
 
-            print("getting average probe depth...")
-
-            depth_adc=get_ave_probe_adc(display_areas)
-
-            print("depth_adc=",depth_adc)
-
-            # now send via modem
-
+            # Initialize modem and send
             update_display(stats_area, time_area, temp_batt_area, probe_area, satellite_area, rtc, stats, temp, batt_volts, f"Ave probe ADC: {depth_adc}", "Initializing modem...")
             rb = init_rockblock()
 
@@ -471,34 +349,24 @@ def main():
                 update_display(stats_area, time_area, temp_batt_area, probe_area, satellite_area, rtc, stats, temp, batt_volts, f"Ave probe ADC: {depth_adc}", "Modem init failed")
                 return
 
-
-
             update_display(stats_area, time_area, temp_batt_area, probe_area, satellite_area, rtc, stats, temp, batt_volts, f"Ave probe ADC: {depth_adc}", "Attempting to send...")
 
-            #gather the data
-            # fake for now
-            #batt_volts=7.
-            #get battery level
+            # Pack data for transmission
+            attempt = 1
+            error_log = 1000
 
+            data = struct.pack("f", batt_volts)
+            data += struct.pack("i", depth_adc)
+            data += struct.pack("i", attempt)
+            data += struct.pack("f", temp)
+            data += struct.pack("i", error_log)
 
-
-            attempt=1 # fake data
-            error_log=1000 #fake data
-
-            data = struct.pack("f",batt_volts)
-            data += struct.pack("i",depth_adc)
-            data += struct.pack("i",attempt)
-            data += struct.pack("f",temp)
-            data += struct.pack("i",error_log)
-
-            #success = send_satellite_message(rb, "hello world", display_areas)
             success = send_satellite_data(rb, data, display_areas)
 
             if success:
                 print("MESSAGE SENT")
 
                 # Sync RTC time from satellite network after successful send
-                print("Syncing time from satellite network...")
                 update_display(stats_area, time_area, temp_batt_area, probe_area, satellite_area, rtc, stats, temp, batt_volts, f"Ave probe ADC: {depth_adc}", "Syncing time...")
                 time_sync_success = sync_time_from_satellite(rb, rtc, display_areas)
 
@@ -510,7 +378,7 @@ def main():
                     update_display(stats_area, time_area, temp_batt_area, probe_area, satellite_area, rtc, stats, temp, batt_volts, f"Ave probe ADC: {depth_adc}", "Send ok, sync failed")
 
                 # Update stats for all send times up to and including current
-                if not FORCE_SEND:  # Only update stats for scheduled sends, not force sends
+                if not FORCE_SEND:
                     for i in range(latest_send_time_index + 1):
                         stats[i] = t.tm_mday
                     write_to_eeprom(eeprom, stats)
@@ -527,20 +395,14 @@ def main():
     except Exception as e:
         print(f"Main execution error: {e}")
         exc_type, exc_value, exc_traceback = sys.exc_info()
-        line_number = exc_traceback.tb_lineno
-        print(f"An exception occurred at line: {line_number}")
-        print(f"Exception details: {e}")
+        if exc_traceback:
+            print(f"Exception at line: {exc_traceback.tb_lineno}")
 
-    time.sleep(5) # to allow for us to see the display
+    time.sleep(5)  # Allow time to see the display
 
     done_pin = digitalio.DigitalInOut(board.D7)
     done_pin.direction = digitalio.Direction.OUTPUT
     done_pin.value = True
 
 if __name__ == "__main__":
-
     main()
-    # Sleeping
-    #done_pin = digitalio.DigitalInOut(board.D7)
-        #done_pin.direction = digitalio.Direction.OUTPUT
-    #done_pin.value = True
